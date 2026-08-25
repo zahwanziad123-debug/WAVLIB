@@ -1,67 +1,40 @@
-/* WAVLIB — interaction animations
-   This file is intentionally separate from the main page styles.
-   It can be loaded from index.html once the page is ready for the CSS split.
-*/
+/* WAVLIB — interaction animations */
 
 @media (prefers-reduced-motion: no-preference) {
-  /* White/gradient primary controls: glow the button surface, not an outline. */
+  /* White controls: glow the whole surface, never a border/outline. */
+  button,
   .signin-btn,
   .search-go,
-  .apply-btn:hover,
-  .toggle-pair button.active {
-    transition:
-      background-color .18s ease,
-      background .18s ease,
-      box-shadow .22s ease,
-      filter .18s ease,
-      transform .12s ease;
+  .apply-btn,
+  .toggle-pair button,
+  .filter-btn,
+  .download-btn,
+  .download-icon,
+  .pack-card button,
+  .track-play,
+  .play-overlay {
+    transition: background-color .18s ease, background .18s ease, box-shadow .22s ease, filter .18s ease, transform .12s ease;
   }
 
-  .signin-btn:hover,
-  .search-go:hover,
-  .apply-btn:hover,
-  .toggle-pair button.active:hover {
+  button:hover, .signin-btn:hover, .search-go:hover, .apply-btn:hover, .toggle-pair button:hover, .filter-btn:hover, .download-btn:hover, .download-icon:hover, .pack-card button:hover, .track-play:hover, .play-overlay:hover {
     filter: brightness(1.08);
-    box-shadow:
-      0 0 12px rgba(255,255,255,.22),
-      0 0 28px rgba(255,255,255,.10);
   }
 
-  .signin-btn:active,
-  .search-go:active,
-  .apply-btn:active,
-  .toggle-pair button.active:active {
+  .signin-btn:hover, .search-go:hover, .apply-btn:hover, .toggle-pair button.active:hover, .download-btn:hover, .download-icon:hover {
+    box-shadow: 0 0 14px rgba(255,255,255,.24), 0 0 30px rgba(255,255,255,.11);
+  }
+
+  .signin-btn:active, .search-go:active, .apply-btn:active, .toggle-pair button:active, .filter-btn:active, .download-btn:active, .download-icon:active, .track-play:active, .play-overlay:active {
     transform: scale(.97);
     filter: brightness(1.18);
-    box-shadow:
-      0 0 18px rgba(255,255,255,.34),
-      0 0 38px rgba(255,255,255,.16);
+    box-shadow: 0 0 18px rgba(255,255,255,.34), 0 0 38px rgba(255,255,255,.16);
   }
 
-  .nav-item,
-  .filter-btn,
-  .pack-art,
-  .track-row,
-  .play-overlay,
-  .track-play {
-    transition-duration: .18s;
-    transition-timing-function: ease;
-  }
-
-  .pack-card:hover .pack-art {
-    transform: translateY(-3px) scale(1.012);
-  }
-
-  .play-overlay:hover,
-  .track-play:hover {
-    transform: scale(1.05);
-  }
+  .pack-card:hover .pack-art { transform: translateY(-3px) scale(1.012); }
+  .play-overlay:hover, .track-play:hover { transform: scale(1.05); }
 }
 
-/* Keyboard users get a clear focus state without turning it into a border glow. */
-button:focus-visible,
-a:focus-visible,
-input:focus-visible {
+button:focus-visible, a:focus-visible, input:focus-visible {
   outline: 2px solid rgba(255,255,255,.75);
   outline-offset: 3px;
 }
