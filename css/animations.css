@@ -1,7 +1,6 @@
 /* WAVLIB — interaction animations */
 
 @media (prefers-reduced-motion: no-preference) {
-  /* White controls: glow the whole surface, never a border/outline. */
   button,
   .signin-btn,
   .search-go,
@@ -17,15 +16,29 @@
     transition: background-color .18s ease, background .18s ease, box-shadow .22s ease, filter .18s ease, transform .12s ease;
   }
 
-  button:hover, .signin-btn:hover, .search-go:hover, .apply-btn:hover, .toggle-pair button:hover, .filter-btn:hover, .download-btn:hover, .download-icon:hover, .pack-download-icon:hover, .pack-card button:hover, .track-play:hover, .play-overlay:hover {
+  /* Exact pack download control. */
+  .pack-download-icon:hover {
+    background: #fff !important;
+    box-shadow: 0 0 16px rgba(255,255,255,.45), 0 0 34px rgba(255,255,255,.22), 0 0 55px rgba(255,255,255,.10) !important;
+    filter: brightness(1.12) !important;
+  }
+
+  .pack-download-icon:active {
+    background: #fff !important;
+    transform: scale(.94);
+    box-shadow: 0 0 22px rgba(255,255,255,.60), 0 0 44px rgba(255,255,255,.28), 0 0 70px rgba(255,255,255,.12) !important;
+    filter: brightness(1.2) !important;
+  }
+
+  button:hover, .signin-btn:hover, .search-go:hover, .apply-btn:hover, .toggle-pair button:hover, .filter-btn:hover, .download-btn:hover, .download-icon:hover, .pack-card button:hover, .track-play:hover, .play-overlay:hover {
     filter: brightness(1.08);
   }
 
-  .signin-btn:hover, .search-go:hover, .apply-btn:hover, .toggle-pair button.active:hover, .pack-download-icon:hover, .download-btn:hover, .download-icon:hover {
+  .signin-btn:hover, .search-go:hover, .apply-btn:hover, .toggle-pair button.active:hover, .download-btn:hover, .download-icon:hover {
     box-shadow: 0 0 14px rgba(255,255,255,.24), 0 0 30px rgba(255,255,255,.11);
   }
 
-  .signin-btn:active, .search-go:active, .apply-btn:active, .toggle-pair button:active, .filter-btn:active, .pack-download-icon:active, .download-btn:active, .download-icon:active, .track-play:active, .play-overlay:active {
+  .signin-btn:active, .search-go:active, .apply-btn:active, .toggle-pair button:active, .filter-btn:active, .download-btn:active, .download-icon:active, .track-play:active, .play-overlay:active {
     transform: scale(.97);
     filter: brightness(1.18);
     box-shadow: 0 0 18px rgba(255,255,255,.34), 0 0 38px rgba(255,255,255,.16);
