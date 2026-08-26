@@ -1,0 +1,106 @@
+name: WAVLIB remove auth keep storage
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/wavlib-remove-auth-keep-storage.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  cleanup:
+    if: ${{ !contains(github.event.head_commit.message, '[wavlib-auth-cleanup]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Remove account auth and personal email, preserve Supabase Storage
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+
+          root = Path('.')
+          text_exts = {'.html', '.js', '.css', '.json', '.md', '.txt', '.yml', '.yaml'}
+          personal_email = 'zahwanziad.123@gmail.com'
+          support_email = 'wavlib.support@gmail.com'
+
+          def clean_text(path: Path, text: str) -> str:
+              original = text
+
+              # Remove the personal/account email everywhere. Never remove the support address.
+              text = text.replace(personal_email, '')
+
+              # Remove Supabase Auth CDN/client bootstrapping while leaving Storage code alone.
+              text = re.sub(r'<script[^>]+src=["\']https://cdn\.jsdelivr\.net/npm/@supabase/supabase-js@[^"\']+["\'][^>]*></script>\s*', '', text, flags=re.I)
+              text = re.sub(r'<script[^>]*>\s*/\*\s*Supabase connection\s*\*/.*?</script>\s*', '', text, flags=re.I | re.S)
+
+              # Remove obvious auth-only JavaScript statements/functions, but do not touch storage.
+              auth_tokens = ('supabase.auth', '.auth.', 'signIn', 'signUp', 'signOut', 'getSession',
+                             'onAuthStateChange', 'applySupabaseUser', 'showAuthRedirectError',
+                             'toggleAccountMenu', 'authModal', 'loginModal', 'signin', 'signup',
+                             'registerAccount', 'currentUser', 'sessionUser')
+              lines = text.splitlines(True)
+              kept = []
+              skip = 0
+              for line in lines:
+                  if skip:
+                      skip -= 1
+                      continue
+                  low = line.lower()
+                  if any(token.lower() in low for token in auth_tokens):
+                      # Remove simple one-line auth code. Preserve support/legal text.
+                      if support_email.lower() in low:
+                          kept.append(line)
+                      continue
+                  kept.append(line)
+              text = ''.join(kept)
+
+              # Remove common account/login/sign-up HTML controls without touching legal links.
+              text = re.sub(r'\s*<button[^>]*(?:class|id|aria-label|title)=["\'][^"\']*(?:sign[- ]?in|log[- ]?in|sign[- ]?up|account|register)[^"\']*["\'][^>]*>.*?</button>\s*', '\n', text, flags=re.I | re.S)
+              text = re.sub(r'\s*<a[^>]*(?:class|id|aria-label|title|href)=["\'][^"\']*(?:sign[- ]?in|log[- ]?in|sign[- ]?up|account|register|auth)[^"\']*["\'][^>]*>.*?</a>\s*', '\n', text, flags=re.I | re.S)
+
+              return text if text != original else original
+
+          changed = []
+          for path in root.rglob('*'):
+              if not path.is_file() or '.git' in path.parts or path.suffix.lower() not in text_exts:
+                  continue
+              try:
+                  text = path.read_text(encoding='utf-8')
+              except UnicodeDecodeError:
+                  continue
+              new = clean_text(path, text)
+              if new != text:
+                  path.write_text(new, encoding='utf-8')
+                  changed.append(str(path))
+
+          print('Changed:', *changed, sep='\n')
+
+          # Keep only the support address as a literal email in the website source.
+          leftovers = []
+          email_re = re.compile(r'[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}')
+          for path in root.rglob('*'):
+              if not path.is_file() or '.git' in path.parts or path.suffix.lower() not in text_exts:
+                  continue
+              try:
+                  text = path.read_text(encoding='utf-8')
+              except UnicodeDecodeError:
+                  continue
+              for match in email_re.findall(text):
+                  if match.lower() != support_email.lower():
+                      leftovers.append((str(path), match))
+          print('Non-support email literals remaining:', leftovers)
+
+      - name: Commit cleanup and remove this one-time workflow
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git rm .github/workflows/wavlib-remove-auth-keep-storage.yml
+          git commit -m '[wavlib-auth-cleanup] remove account auth and personal email'
+          git push
