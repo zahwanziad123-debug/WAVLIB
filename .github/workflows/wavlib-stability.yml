@@ -17,61 +17,88 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Apply deep runtime stability fixes
+      - name: Remove account/auth code and personal email; keep Supabase Storage
         shell: python
         run: |
           from pathlib import Path
           import re
 
-          p = Path('index.html')
-          s = p.read_text(encoding='utf-8')
+          root = Path('.')
+          text_exts = {'.html', '.js', '.css', '.json', '.md', '.txt'}
+          personal_email = 'zahwanziad.123@gmail.com'
+          support_email = 'wavlib.support@gmail.com'
 
-          # Make fonts non-blocking and bust stale browser caches for local assets.
-          s = s.replace(
-              '<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">',
-              '<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" media="print" onload="this.media=\'all\'">'
-          )
-          s = re.sub(r'href="css/animations\.css(?:\?[^\"]*)?"', 'href="css/animations.css?v=20260826-4"', s, count=1)
-          s = re.sub(r'src="js/ui\.js(?:\?[^\"]*)?"', 'src="js/ui.js?v=20260826-4"', s, count=1)
+          # Work on the full source files so account code is removed without damaging unrelated lines.
+          for path in root.rglob('*'):
+              if not path.is_file() or '.git' in path.parts or path.suffix.lower() not in text_exts:
+                  continue
+              try:
+                  text = path.read_text(encoding='utf-8')
+              except UnicodeDecodeError:
+                  continue
+              original = text
 
-          # Remove the synchronous Supabase CDN dependency. Auth is disabled, so it must never
-          # be able to prevent the sample library from booting when a third-party CDN is slow.
-          supabase_pattern = r'<script src="https://cdn\.jsdelivr\.net/npm/@supabase/supabase-js@2"></script>\s*<script>\s*/\* Supabase connection \*/.*?</script>'
-          supabase_stub = '''<script>\n/* WAVLIB authentication is disabled. Local compatibility only; no network dependency. */\nconst wavlibSupabase = {\n  auth: {\n    getSession: async () => ({ data: { session: null } }),\n    onAuthStateChange: () => ({ data: { subscription: { unsubscribe() {} } } }),\n    signInWithPassword: async () => ({ data: { user: null }, error: { message: 'Authentication is disabled.' } }),\n    signUp: async () => ({ data: { user: null, session: null }, error: { message: 'Authentication is disabled.' } }),\n    signOut: async () => ({ error: null })\n  }\n};\n</script>'''
-          s = re.sub(supabase_pattern, supabase_stub, s, count=1, flags=re.S)
+              # Remove the personal/account email from website source. Support email is untouched.
+              text = text.replace(personal_email, '')
 
-          # Remove the auth session boot section without depending on fragile nested parentheses.
-          s = re.sub(
-              r'\s*showAuthRedirectError\(\);.*?\n\s*function toggleAccountMenu\(\)',
-              '\napplySupabaseUser(null);\n\nfunction toggleAccountMenu()',
-              s,
-              count=1,
-              flags=re.S
-          )
+              # Remove Supabase Auth API usage only. Keep Supabase itself and all supabase.storage code.
+              text = re.sub(r'^.*\bsupabase\.auth\.[^;\n]*;?.*$', '', text, flags=re.I | re.M)
+              text = re.sub(r'^.*\b(?:signInWithPassword|signUp|signOut|getSession|onAuthStateChange)\s*\([^;\n]*\)\s*;?.*$', '', text, flags=re.I | re.M)
 
-          # Unlink account/login/sign-up controls. WAVLIB has no user account flow.
-          s = re.sub(r'\s*<button[^>]*class="[^"]*signin-btn[^"]*"[^>]*>.*?</button>\s*', '\n', s, flags=re.S)
-          s = re.sub(r'\s*<a[^>]*(?:href|onclick)="[^"]*(?:login|signin|signup|register|account|auth)[^"]*"[^>]*>.*?</a>\s*', '\n', s, flags=re.I | re.S)
+              # Remove known account/auth helper functions from the legacy page script.
+              for name in ('showAuthRedirectError', 'toggleAccountMenu', 'applySupabaseUser', 'registerAccount'):
+                  text = re.sub(
+                      r'\n\s*(?:async\s+)?function\s+' + re.escape(name) + r'\s*\([^)]*\)\s*\{.*?\n\s*\}\s*',
+                      '\n', text, flags=re.S
+                  )
 
-          # Remove any browser/autofill email from website inputs. The only permitted email is the
-          # static WAVLIB support address, not an input value.
-          email_cleanup = '''<script id="wavlib-email-cleanup">\n(() => {\n  const email = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;\n  const clean = () => document.querySelectorAll('input, textarea').forEach((el) => {\n    const value = String(el.value || '').trim();\n    if (value && email.test(value) && value.toLowerCase() !== 'wavlib.support@gmail.com') {\n      el.value = '';\n      el.removeAttribute('value');\n      el.dispatchEvent(new Event('input', { bubbles: true }));\n      el.dispatchEvent(new Event('change', { bubbles: true }));\n    }\n    el.setAttribute('autocomplete', 'off');\n    el.setAttribute('autocorrect', 'off');\n    el.setAttribute('autocapitalize', 'off');\n    el.setAttribute('spellcheck', 'false');\n    el.setAttribute('data-form-type', 'other');\n    el.setAttribute('data-lpignore', 'true');\n    el.setAttribute('data-1p-ignore', 'true');\n  });\n  clean();\n  window.addEventListener('pageshow', clean, { passive: true });\n  document.addEventListener('input', clean, true);\n  document.addEventListener('change', clean, true);\n  new MutationObserver(clean).observe(document.documentElement, { childList: true, subtree: true });\n  [0, 100, 300, 600, 1200, 2000, 4000].forEach((n) => setTimeout(clean, n));\n})();\n</script>\n'''
-          if 'id="wavlib-email-cleanup"' not in s:
-              s = s.replace('</body>', email_cleanup + '</body>', 1)
+              # Remove account/login/signup UI controls only.
+              text = re.sub(r'\s*<button[^>]*(?:class|id|aria-label|title)=["\'][^"\']*(?:sign[- ]?in|log[- ]?in|sign[- ]?up|account|register)[^"\']*["\'][^>]*>.*?</button>\s*', '\n', text, flags=re.I | re.S)
+              text = re.sub(r'\s*<a[^>]*(?:class|id|aria-label|title|href)=["\'][^"\']*(?:sign[- ]?in|log[- ]?in|sign[- ]?up|account|register|auth)[^"\']*["\'][^>]*>.*?</a>\s*', '\n', text, flags=re.I | re.S)
 
-          # Hard-disable any legacy splash overlay and reduce paint cost for large lists.
-          if 'id="wavlib-stability-overrides"' not in s:
-              override = '''<style id="wavlib-stability-overrides">\n  body::before, body::after { display:none !important; content:none !important; animation:none !important; }\n  .pack-card, .track-row { contain: layout paint style; }\n  .pack-row, .pack-grid, .track-list { contain: layout paint; }\n  @media (prefers-reduced-motion: reduce) { * { animation-duration:0.001ms !important; transition-duration:0.001ms !important; } }\n</style>\n'''
-              s = s.replace('</head>', override + '</head>', 1)
+              if text != original:
+                  path.write_text(text, encoding='utf-8')
+                  print('cleaned', path)
 
-          p.write_text(s, encoding='utf-8')
-          Path('.nojekyll').write_text('', encoding='utf-8')
+          # Harden every search/input field against browser/password-manager account autofill.
+          ui = root / 'js' / 'ui.js'
+          if ui.exists():
+              text = ui.read_text(encoding='utf-8')
+              text = text.replace("input.setAttribute('autocomplete', 'off');", "input.setAttribute('autocomplete', 'new-password');")
+              if 'function setupGlobalEmailRemoval()' not in text:
+                  marker = '  function boot() {'
+                  fn = '''  function setupGlobalEmailRemoval() {\n    const emailPattern = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;\n    const clean = () => {\n      document.querySelectorAll('input, textarea').forEach((input) => {\n        input.setAttribute('autocomplete', 'new-password');\n        input.setAttribute('autocorrect', 'off');\n        input.setAttribute('autocapitalize', 'off');\n        input.setAttribute('spellcheck', 'false');\n        input.setAttribute('data-form-type', 'other');\n        input.setAttribute('data-lpignore', 'true');\n        input.setAttribute('data-1p-ignore', 'true');\n        const value = String(input.value || '').trim();\n        if (emailPattern.test(value)) {\n          input.value = '';\n          input.removeAttribute('value');\n          input.dispatchEvent(new Event('input', { bubbles: true }));\n          input.dispatchEvent(new Event('change', { bubbles: true }));\n        }\n      });\n    };\n    clean();\n    document.addEventListener('input', clean, true);\n    document.addEventListener('change', clean, true);\n    document.addEventListener('focusin', clean, true);\n    window.addEventListener('pageshow', clean, { passive: true });\n    [0,100,250,500,1000,2000,4000,8000].forEach((n) => window.setTimeout(clean, n));\n    window.setInterval(clean, 300);\n  }\n\n'''
+                  text = text.replace(marker, fn + marker, 1)
+                  text = text.replace('    setupTopSearch();', '    setupGlobalEmailRemoval();\n    setupTopSearch();', 1)
+              ui.write_text(text, encoding='utf-8')
+
+          # Bust the old cached JS so the browser receives the cleanup immediately.
+          index = root / 'index.html'
+          if index.exists():
+              text = index.read_text(encoding='utf-8')
+              text = re.sub(r'src="js/ui\\.js(?:\\?[^\"]*)?"', 'src="js/ui.js?v=20260826-6"', text, count=1)
+              index.write_text(text, encoding='utf-8')
+
+          # Keep Supabase Storage code intact. Only report non-support email literals for verification.
+          email_re = re.compile(r'[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}')
+          for path in root.rglob('*'):
+              if not path.is_file() or '.git' in path.parts or path.suffix.lower() not in text_exts:
+                  continue
+              try:
+                  text = path.read_text(encoding='utf-8')
+              except UnicodeDecodeError:
+                  continue
+              bad = [m for m in email_re.findall(text) if m.lower() != support_email.lower()]
+              if bad:
+                  print('NON_SUPPORT_EMAIL', path, bad)
+
+          Path('.nojekyll').touch()
 
       - name: Commit repair
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add index.html .nojekyll
+          git add -A
           git diff --cached --quiet && exit 0
-          git commit -m "Deep WAVLIB stability repair [wavlib-auto]"
+          git commit -m "Remove account auth and personal email [wavlib-auto]"
           git push
