@@ -156,8 +156,38 @@
     setOpen(false);
   }
 
+  function setupGlobalEmailRemoval() {
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const clean = () => {
+      document.querySelectorAll('input, textarea').forEach((input) => {
+        input.setAttribute('autocomplete', 'new-password');
+        input.setAttribute('autocorrect', 'off');
+        input.setAttribute('autocapitalize', 'off');
+        input.setAttribute('spellcheck', 'false');
+        input.setAttribute('data-form-type', 'other');
+        input.setAttribute('data-lpignore', 'true');
+        input.setAttribute('data-1p-ignore', 'true');
+        const value = String(input.value || '').trim();
+        if (emailPattern.test(value)) {
+          input.value = '';
+          input.removeAttribute('value');
+          input.dispatchEvent(new Event('input', { bubbles: true }));
+          input.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+      });
+    };
+    clean();
+    document.addEventListener('input', clean, true);
+    document.addEventListener('change', clean, true);
+    document.addEventListener('focusin', clean, true);
+    window.addEventListener('pageshow', clean, { passive: true });
+    [0,100,250,500,1000,2000,4000,8000].forEach((n) => window.setTimeout(clean, n));
+    window.setInterval(clean, 300);
+  }
+
   function boot() {
     setupGlobalEmailAndAccountCleanup();
+    setupGlobalEmailRemoval();
     setupTopSearch();
     setupMobileSidebar();
     watchPackSampleSearch();
