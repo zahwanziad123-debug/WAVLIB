@@ -35,8 +35,6 @@
     input.setAttribute('data-1p-ignore', 'true');
     input.setAttribute('role', 'searchbox');
 
-    // Keep the field readonly until the user deliberately clicks it. This prevents
-    // Chrome and password managers from injecting a saved account email into it.
     input.readOnly = true;
 
     const isEmail = (value) => /^\s*[^\s@]+@[^\s@]+\.[^\s@]+\s*$/.test(value || '');
@@ -64,7 +62,6 @@
     input.addEventListener('focus', clearEmail);
     input.addEventListener('input', clearEmail);
 
-    // Catch browser autofill/page restoration without repeatedly touching real searches.
     [0, 100, 300, 600, 1200].forEach((delay) => {
       window.setTimeout(() => {
         if (input.readOnly || isEmail(input.value)) clearEmail();
@@ -89,18 +86,38 @@
     input.setAttribute('data-1p-ignore', 'true');
     input.setAttribute('aria-label', 'Search samples in this pack');
 
+    input.readOnly = true;
+
     const isEmail = (value) => /^\s*[^\s@]+@[^\s@]+\.[^\s@]+\s*$/.test(value || '');
+    const clearValue = () => {
+      input.value = '';
+      input.removeAttribute('value');
+    };
     const clearEmail = () => {
-      if (isEmail(input.value)) input.value = '';
+      if (isEmail(input.value)) {
+        clearValue();
+        if (typeof window.filterPackSamples === 'function') window.filterPackSamples();
+      }
     };
 
+    clearValue();
     clearEmail();
+
+    const activateSearch = () => {
+      clearValue();
+      input.readOnly = false;
+      input.removeAttribute('readonly');
+      input.focus({ preventScroll: true });
+    };
+
+    input.addEventListener('pointerdown', activateSearch, { once: true });
+    input.addEventListener('mousedown', activateSearch, { once: true });
+    input.addEventListener('touchstart', activateSearch, { once: true, passive: true });
     input.addEventListener('focus', clearEmail);
     input.addEventListener('input', clearEmail);
     window.addEventListener('pageshow', clearEmail, { passive: true });
 
-    // Chrome can restore/autofill a value shortly after dynamically creating the field.
-    [0, 100, 300, 600, 1200].forEach((delay) => {
+    [0, 100, 300, 600, 1200, 2000].forEach((delay) => {
       window.setTimeout(clearEmail, delay);
     });
 
@@ -113,6 +130,27 @@
       if (setupPackSampleSearch()) observer.disconnect();
     });
     observer.observe(document.body, { childList: true, subtree: true });
+  }
+
+  function setupLegalLinks() {
+    const legal = document.querySelector('.legal');
+    if (!legal || legal.dataset.wavlibLegalReady === '1') return;
+    legal.dataset.wavlibLegalReady = '1';
+
+    const links = {
+      'Terms': 'terms.html',
+      'Privacy': 'privacy.html',
+      'Disclaimer': 'disclaimer.html',
+      'Copyright': 'copyright.html'
+    };
+
+    legal.querySelectorAll('a').forEach((link) => {
+      const label = link.textContent.trim();
+      if (links[label]) {
+        link.href = links[label];
+        link.removeAttribute('onclick');
+      }
+    });
   }
 
   function setupMobileSidebar() {
@@ -183,6 +221,7 @@
     setupTopSearch();
     setupMobileSidebar();
     watchPackSampleSearch();
+    setupLegalLinks();
   }
 
   if (document.readyState === 'loading') {
