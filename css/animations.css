@@ -52,3 +52,321 @@ button:focus-visible, a:focus-visible, input:focus-visible {
   outline: 2px solid rgba(255,255,255,.75);
   outline-offset: 3px;
 }
+
+/* ---------- MOBILE RESPONSIVE FIXES ---------- */
+@media (max-width: 768px) {
+  html,
+  body {
+    width: 100%;
+    min-width: 0;
+    min-height: 100%;
+    overflow: hidden;
+  }
+
+  body {
+    font-size: 14px;
+    overflow-x: hidden;
+  }
+
+  .app {
+    width: 100%;
+    min-width: 0;
+    height: 100dvh;
+    min-height: 100vh;
+    overflow: hidden;
+  }
+
+  .sidebar {
+    width: 100%;
+    height: auto;
+    flex: 0 0 auto;
+    padding: 10px 12px;
+    border-right: 0;
+    border-bottom: 1px solid var(--border);
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    overflow: hidden;
+  }
+
+  .logo {
+    padding: 0;
+    flex: 0 0 auto;
+  }
+
+  .brand-logo {
+    width: 94px;
+    height: 42px;
+  }
+
+  .nav {
+    flex: 1 1 auto;
+    min-width: 0;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 4px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .nav-item {
+    flex: 0 0 auto;
+    padding: 8px 9px;
+    gap: 6px;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+
+  .signin-btn {
+    flex: 0 0 auto;
+    width: auto;
+    min-width: 78px;
+    padding: 9px 11px;
+    font-size: 12px;
+  }
+
+  .legal {
+    display: none;
+  }
+
+  .main {
+    width: 100%;
+    min-width: 0;
+    height: auto;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .topbar {
+    width: 100%;
+    min-width: 0;
+    padding: 10px 12px;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .crumb {
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 12px;
+  }
+
+  .search-wrap,
+  .topbar .search-wrap {
+    flex: 1 1 100%;
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+  }
+
+  .search-input {
+    min-width: 0;
+    font-size: 13px;
+    padding: 10px 42px 10px 14px;
+  }
+
+  .content {
+    width: 100%;
+    min-width: 0;
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 16px 12px 80px;
+  }
+
+  .section-head {
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 24px;
+  }
+
+  .section-title {
+    min-width: 0;
+    font-size: 16px;
+  }
+
+  .section-link {
+    font-size: 12px;
+  }
+
+  .home-tagline {
+    max-width: 100%;
+    line-height: 1.55;
+  }
+
+  .pack-row {
+    grid-auto-columns: minmax(132px, 42vw);
+    gap: 10px;
+    max-width: 100%;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+  }
+
+  .pack-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .pack-art {
+    border-radius: 9px;
+  }
+
+  .pack-name {
+    font-size: 12px;
+  }
+
+  .pack-tags,
+  .track-tags {
+    max-width: 100%;
+    overflow: hidden;
+  }
+
+  .tag {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .track-row {
+    width: 100%;
+    min-width: 0;
+    gap: 8px;
+    padding: 10px 2px;
+  }
+
+  .track-info {
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .track-name {
+    min-width: 0;
+  }
+
+  .track-time,
+  .waveform {
+    display: none;
+  }
+
+  .filter-bar {
+    width: 100%;
+    min-width: 0;
+    gap: 8px;
+  }
+
+  .filter-bar .search-wrap {
+    flex: 1 1 100%;
+  }
+
+  .filter-btn {
+    max-width: 100%;
+    padding: 8px 11px;
+    font-size: 12px;
+  }
+
+  .filter-panel {
+    position: fixed;
+    left: 12px;
+    right: 12px;
+    top: auto;
+    bottom: 12px;
+    width: auto;
+    max-width: none;
+    max-height: min(72vh, 520px);
+    overflow-y: auto;
+    z-index: 1000;
+  }
+
+  .range-inputs {
+    min-width: 0;
+  }
+
+  .key-grid {
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+  }
+
+  .content * {
+    max-width: 100%;
+  }
+
+  .content img,
+  .content video,
+  .content canvas,
+  .content iframe {
+    max-width: 100%;
+    height: auto;
+  }
+
+  input,
+  select,
+  textarea,
+  button {
+    max-width: 100%;
+  }
+
+  [role="dialog"],
+  [aria-modal="true"] {
+    max-width: calc(100vw - 24px) !important;
+    max-height: calc(100dvh - 24px) !important;
+    overflow-y: auto;
+  }
+}
+
+@media (max-width: 420px) {
+  .sidebar {
+    padding: 8px 9px;
+    gap: 6px;
+  }
+
+  .brand-logo {
+    width: 78px;
+    height: 36px;
+  }
+
+  .nav {
+    justify-content: flex-start;
+  }
+
+  .nav-item {
+    padding: 7px 7px;
+    font-size: 11px;
+  }
+
+  .nav-item svg {
+    width: 15px;
+    height: 15px;
+  }
+
+  .signin-btn {
+    min-width: 68px;
+    padding: 8px 9px;
+    font-size: 11px;
+  }
+
+  .topbar {
+    padding: 8px 9px;
+  }
+
+  .content {
+    padding-left: 9px;
+    padding-right: 9px;
+  }
+
+  .pack-grid {
+    gap: 8px;
+  }
+
+  .track-row {
+    padding-left: 0;
+    padding-right: 0;
+  }
+}
