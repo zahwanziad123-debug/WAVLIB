@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>WAVLIB — Sample Library</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 
-<link rel="stylesheet" href="css/animations.css">
+<link rel="stylesheet" href="css/animations.css?v=20260826-4">
   
 <style>
   :root{
@@ -793,6 +793,12 @@ body{
 .submit-btn:hover{background:#222 !important;opacity:1 !important;}
 .auth-switch b{color:#000 !important;}
 </style>
+<style id="wavlib-stability-overrides">
+  body::before, body::after { display:none !important; content:none !important; animation:none !important; }
+  .pack-card, .track-row { contain: layout paint style; }
+  .pack-row, .pack-grid, .track-list { contain: layout paint; }
+  @media (prefers-reduced-motion: reduce) { * { animation-duration:0.001ms !important; transition-duration:0.001ms !important; } }
+</style>
 </head>
 <body>
 
@@ -1032,15 +1038,17 @@ body{
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-/* Supabase connection */
-const WAVLIB_SUPABASE_URL = "https://ayzyceixwbyyzfxoksuq.supabase.co";
-const WAVLIB_SUPABASE_PUBLISHABLE_KEY = "sb_publishable_V2pZVN8X_RiMj6F_gdESMg_EfHPRvqF";
-const wavlibSupabase = window.supabase.createClient(
-  WAVLIB_SUPABASE_URL,
-  WAVLIB_SUPABASE_PUBLISHABLE_KEY
-);
+/* WAVLIB authentication is disabled. Local compatibility only; no network dependency. */
+const wavlibSupabase = {
+  auth: {
+    getSession: async () => ({ data: { session: null } }),
+    onAuthStateChange: () => ({ data: { subscription: { unsubscribe() {} } } }),
+    signInWithPassword: async () => ({ data: { user: null }, error: { message: 'Authentication is disabled.' } }),
+    signUp: async () => ({ data: { user: null, session: null }, error: { message: 'Authentication is disabled.' } }),
+    signOut: async () => ({ error: null })
+  }
+};
 </script>
 
 <script>
@@ -1680,16 +1688,7 @@ document.getElementById('signup-confirm-password')?.addEventListener('input', ()
   setFieldError('signup-confirm-password','signup-confirm-error', password===confirm ? '' : 'Passwords do not match.');
   if(password===confirm) document.getElementById('signup-confirm-password')?.classList.add('valid');
 });
-
-showAuthRedirectError();
-
-wavlibSupabase.auth.getSession().then(({data})=>{
-  applySupabaseUser(data.session?.user || null);
-});
-
-wavlibSupabase.auth.onAuthStateChange((_event, session)=>{
-  applySupabaseUser(session?.user || null);
-});
+applySupabaseUser(null);
 
 function toggleAccountMenu(){
   const menu=document.getElementById('account-menu');
@@ -1712,6 +1711,6 @@ async function logoutWavlib(){
 }
 
 </script>
-<script src="js/ui.js"></script>
+<script src="js/ui.js?v=20260826-4"></script>
 </body>
 </html>
