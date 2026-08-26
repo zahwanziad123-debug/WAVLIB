@@ -1,4 +1,5 @@
 @import url("mobile.css");
+@import url("mobile-fix.css");
 
 /* WAVLIB interaction animations */
 @media (prefers-reduced-motion: no-preference) {
