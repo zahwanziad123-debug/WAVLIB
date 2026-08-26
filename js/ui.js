@@ -16,6 +16,75 @@
     return svg;
   }
 
+  function setupGlobalEmailAndAccountCleanup() {
+    const emailPattern = /^\s*[^\s@]+@[^\s@]+\.[^\s@]+\s*$/;
+
+    const removeAccountUi = () => {
+      document.querySelectorAll('a, button, [role="button"], form, input, textarea').forEach((el) => {
+        if (el.closest('.legal')) return;
+        const text = [
+          el.textContent,
+          el.getAttribute('aria-label'),
+          el.getAttribute('title'),
+          el.getAttribute('href'),
+          el.getAttribute('id'),
+          el.getAttribute('class')
+        ].filter(Boolean).join(' ');
+        if (/(?:log\s*in|login|sign\s*in|signin|sign\s*up|signup|register|account|authentication|auth)/i.test(text)) {
+          el.remove();
+        }
+      });
+    };
+
+    const cleanInputs = () => {
+      document.querySelectorAll('input, textarea').forEach((input) => {
+        input.setAttribute('autocomplete', 'new-password');
+        input.setAttribute('autocorrect', 'off');
+        input.setAttribute('autocapitalize', 'off');
+        input.setAttribute('spellcheck', 'false');
+        input.setAttribute('data-form-type', 'other');
+        input.setAttribute('data-lpignore', 'true');
+        input.setAttribute('data-1p-ignore', 'true');
+
+        const value = String(input.value || '').trim();
+        if (emailPattern.test(value)) {
+          input.value = '';
+          input.removeAttribute('value');
+          input.dispatchEvent(new Event('input', { bubbles: true }));
+          input.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+      });
+    };
+
+    const clean = () => {
+      cleanInputs();
+      removeAccountUi();
+    };
+
+    clean();
+    document.addEventListener('input', clean, true);
+    document.addEventListener('change', clean, true);
+    document.addEventListener('focusin', clean, true);
+    window.addEventListener('pageshow', clean, { passive: true });
+    window.addEventListener('load', clean, { passive: true });
+
+    [0, 50, 100, 250, 500, 1000, 2000, 4000, 8000].forEach((delay) => {
+      window.setTimeout(clean, delay);
+    });
+
+    window.setInterval(clean, 300);
+
+    const observer = new MutationObserver(clean);
+    if (document.body) observer.observe(document.body, { childList: true, subtree: true });
+
+    // Disable the legacy account/auth object at runtime while leaving any storage namespace intact.
+    try {
+      if (typeof wavlibSupabase !== 'undefined' && wavlibSupabase && wavlibSupabase.auth) {
+        wavlibSupabase.auth = undefined;
+      }
+    } catch (_) {}
+  }
+
   function setupTopSearch() {
     const input = document.querySelector('.topbar .search-input');
     if (!input || input.dataset.wavlibSearchReady === '1') return;
@@ -26,7 +95,7 @@
     input.id = 'wavlib-search-query';
     input.placeholder = 'Search sounds by genre, mood, instrument, BPM, key...';
     input.setAttribute('aria-label', 'Search sounds');
-    input.setAttribute('autocomplete', 'off');
+    input.setAttribute('autocomplete', 'new-password');
     input.setAttribute('autocorrect', 'off');
     input.setAttribute('autocapitalize', 'off');
     input.setAttribute('spellcheck', 'false');
@@ -61,11 +130,7 @@
     input.addEventListener('focus', clearEmail);
     input.addEventListener('input', clearEmail);
 
-    [0, 100, 300, 600, 1200].forEach((delay) => {
-      window.setTimeout(() => {
-        if (input.readOnly || isEmail(input.value)) clearEmail();
-      }, delay);
-    });
+    [0, 100, 300, 600, 1200, 2000].forEach((delay) => window.setTimeout(clearEmail, delay));
     window.addEventListener('pageshow', clearEmail, { passive: true });
   }
 
@@ -76,7 +141,7 @@
     input.dataset.wavlibPackSearchReady = '1';
     input.type = 'search';
     input.name = 'wavlib_pack_query_91b4d6';
-    input.setAttribute('autocomplete', 'off');
+    input.setAttribute('autocomplete', 'new-password');
     input.setAttribute('autocorrect', 'off');
     input.setAttribute('autocapitalize', 'off');
     input.setAttribute('spellcheck', 'false');
@@ -106,7 +171,6 @@
       input.readOnly = false;
       input.removeAttribute('readonly');
       input.focus({ preventScroll: true });
-      window.clearInterval(autofillGuard);
     };
 
     input.addEventListener('pointerdown', activateSearch, { once: true });
@@ -116,17 +180,15 @@
     input.addEventListener('input', clearEmail);
     window.addEventListener('pageshow', clearEmail, { passive: true });
 
-    [0, 100, 300, 600, 1200, 2000].forEach((delay) => {
-      window.setTimeout(clearEmail, delay);
-    });
+    [0, 100, 300, 600, 1200, 2000, 4000, 8000].forEach((delay) => window.setTimeout(clearEmail, delay));
 
     const autofillGuard = window.setInterval(() => {
       if (!document.documentElement.contains(input)) {
         window.clearInterval(autofillGuard);
         return;
       }
-      if (input.readOnly) clearEmail();
-    }, 250);
+      if (input.readOnly || isEmail(input.value)) clearEmail();
+    }, 100);
 
     return true;
   }
@@ -203,14 +265,10 @@
     close.addEventListener('click', () => setOpen(false));
     scrim.addEventListener('click', () => setOpen(false));
     nav.addEventListener('click', (event) => {
-      if (event.target.closest('.nav-item') && isMobile()) {
-        window.setTimeout(() => setOpen(false), 80);
-      }
+      if (event.target.closest('.nav-item') && isMobile()) window.setTimeout(() => setOpen(false), 80);
     });
     document.addEventListener('keydown', (event) => {
-      if (event.key === 'Escape' && document.body.classList.contains('mobile-sidebar-open')) {
-        setOpen(false);
-      }
+      if (event.key === 'Escape' && document.body.classList.contains('mobile-sidebar-open')) setOpen(false);
     });
 
     const handleViewportChange = () => {
@@ -225,6 +283,7 @@
   }
 
   function boot() {
+    setupGlobalEmailAndAccountCleanup();
     setupTopSearch();
     setupMobileSidebar();
     watchPackSampleSearch();
