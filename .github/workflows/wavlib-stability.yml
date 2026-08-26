@@ -34,7 +34,7 @@ jobs:
           s = re.sub(r'href="css/animations\.css(?:\?[^\"]*)?"', 'href="css/animations.css?v=20260826-4"', s, count=1)
           s = re.sub(r'src="js/ui\.js(?:\?[^\"]*)?"', 'src="js/ui.js?v=20260826-4"', s, count=1)
 
-          # Remove the synchronous Supabase CDN dependency. Auth is hidden, so it must never
+          # Remove the synchronous Supabase CDN dependency. Auth is disabled, so it must never
           # be able to prevent the sample library from booting when a third-party CDN is slow.
           supabase_pattern = r'<script src="https://cdn\.jsdelivr\.net/npm/@supabase/supabase-js@2"></script>\s*<script>\s*/\* Supabase connection \*/.*?</script>'
           supabase_stub = '''<script>\n/* WAVLIB authentication is disabled. Local compatibility only; no network dependency. */\nconst wavlibSupabase = {\n  auth: {\n    getSession: async () => ({ data: { session: null } }),\n    onAuthStateChange: () => ({ data: { subscription: { unsubscribe() {} } } }),\n    signInWithPassword: async () => ({ data: { user: null }, error: { message: 'Authentication is disabled.' } }),\n    signUp: async () => ({ data: { user: null, session: null }, error: { message: 'Authentication is disabled.' } }),\n    signOut: async () => ({ error: null })\n  }\n};\n</script>'''
@@ -48,6 +48,16 @@ jobs:
               count=1,
               flags=re.S
           )
+
+          # Unlink account/login/sign-up controls. WAVLIB has no user account flow.
+          s = re.sub(r'\s*<button[^>]*class="[^"]*signin-btn[^"]*"[^>]*>.*?</button>\s*', '\n', s, flags=re.S)
+          s = re.sub(r'\s*<a[^>]*(?:href|onclick)="[^"]*(?:login|signin|signup|register|account|auth)[^"]*"[^>]*>.*?</a>\s*', '\n', s, flags=re.I | re.S)
+
+          # Remove any browser/autofill email from website inputs. The only permitted email is the
+          # static WAVLIB support address, not an input value.
+          email_cleanup = '''<script id="wavlib-email-cleanup">\n(() => {\n  const email = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;\n  const clean = () => document.querySelectorAll('input, textarea').forEach((el) => {\n    const value = String(el.value || '').trim();\n    if (value && email.test(value) && value.toLowerCase() !== 'wavlib.support@gmail.com') {\n      el.value = '';\n      el.removeAttribute('value');\n      el.dispatchEvent(new Event('input', { bubbles: true }));\n      el.dispatchEvent(new Event('change', { bubbles: true }));\n    }\n    el.setAttribute('autocomplete', 'off');\n    el.setAttribute('autocorrect', 'off');\n    el.setAttribute('autocapitalize', 'off');\n    el.setAttribute('spellcheck', 'false');\n    el.setAttribute('data-form-type', 'other');\n    el.setAttribute('data-lpignore', 'true');\n    el.setAttribute('data-1p-ignore', 'true');\n  });\n  clean();\n  window.addEventListener('pageshow', clean, { passive: true });\n  document.addEventListener('input', clean, true);\n  document.addEventListener('change', clean, true);\n  new MutationObserver(clean).observe(document.documentElement, { childList: true, subtree: true });\n  [0, 100, 300, 600, 1200, 2000, 4000].forEach((n) => setTimeout(clean, n));\n})();\n</script>\n'''
+          if 'id="wavlib-email-cleanup"' not in s:
+              s = s.replace('</body>', email_cleanup + '</body>', 1)
 
           # Hard-disable any legacy splash overlay and reduce paint cost for large lists.
           if 'id="wavlib-stability-overrides"' not in s:
