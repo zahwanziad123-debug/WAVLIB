@@ -1,4 +1,4 @@
-/* WAVLIB — mobile navigation behavior. */
+/* WAVLIB — mobile navigation + auth/autofill cleanup. */
 
 (() => {
   'use strict';
@@ -84,20 +84,56 @@
     document.querySelectorAll(selectors.join(',')).forEach(el => el.remove());
 
     const authWords = /\b(sign\s*in|sign\s*up|sign\s*out|log\s*in|log\s*out|gmail|google\s+account|email\s+address|password|authentication)\b/i;
-    const roots = document.querySelectorAll('header,nav,aside,footer,[role="dialog"],[role="menu"],.modal,.overlay');
-    roots.forEach(root => {
-      Array.from(root.querySelectorAll('a,button,label,input,p,span,div')).forEach(el => {
+    document.querySelectorAll('header,nav,aside,footer,[role="dialog"],[role="menu"],.modal,.overlay').forEach(root => {
+      Array.from(root.querySelectorAll('a,button,label,p,span,div')).forEach(el => {
         const text = (el.textContent || '').trim();
         if (text && authWords.test(text) && el.children.length < 4) el.remove();
       });
     });
   }
 
+  function clearEmailAutofill() {
+    document.querySelectorAll('input,textarea').forEach(input => {
+      const value = String(input.value || '').trim();
+      const meta = `${input.name || ''} ${input.id || ''} ${input.getAttribute('autocomplete') || ''} ${input.getAttribute('placeholder') || ''}`.toLowerCase();
+      if (input.type === 'email' || /email|e-mail|gmail|password|login|signin|signup/.test(meta) || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+        input.value = '';
+        input.removeAttribute('value');
+        input.removeAttribute('name');
+        input.removeAttribute('id');
+        input.setAttribute('autocomplete', 'off');
+        input.setAttribute('data-wavlib-clean', '1');
+        if (input.classList.contains('search-input') || input.type === 'email') input.type = 'search';
+      }
+    });
+
+    document.querySelectorAll('input.search-input').forEach(input => {
+      input.type = 'search';
+      input.name = 'wavlib-search';
+      input.setAttribute('autocomplete', 'off');
+      input.setAttribute('autocapitalize', 'none');
+      input.setAttribute('spellcheck', 'false');
+      if (String(input.value || '').includes('@')) input.value = '';
+    });
+  }
+
+  function removeAuthAndAutofill() {
+    removeAuthUi();
+    clearEmailAutofill();
+  }
+
   function boot() {
     setupMobileSidebar();
-    removeAuthUi();
-    const observer = new MutationObserver(() => removeAuthUi());
-    observer.observe(document.documentElement, { childList: true, subtree: true });
+    removeAuthAndAutofill();
+
+    const observer = new MutationObserver(() => removeAuthAndAutofill());
+    observer.observe(document.documentElement, { childList: true, subtree: true, attributes: true, attributeFilter: ['value','name','id','autocomplete'] });
+
+    window.addEventListener('load', removeAuthAndAutofill, { once: true });
+    window.addEventListener('pageshow', removeAuthAndAutofill);
+    window.setTimeout(removeAuthAndAutofill, 100);
+    window.setTimeout(removeAuthAndAutofill, 500);
+    window.setTimeout(removeAuthAndAutofill, 1500);
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
