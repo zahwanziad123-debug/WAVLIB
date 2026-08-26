@@ -14,11 +14,6 @@
 }
 button:focus-visible,a:focus-visible,input:focus-visible { outline:2px solid rgba(255,255,255,.75); outline-offset:3px; }
 
-/* Safe visual-only intro. It overlays the existing page, then disappears; it never hides .app or changes layout. */
-body::before{content:"WAVLIB";position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;pointer-events:none;color:#050505;font-family:'Space Grotesk',sans-serif;font-size:clamp(34px,7vw,82px);font-weight:700;letter-spacing:.18em;background:radial-gradient(circle at 28% 35%,rgba(255,255,255,.22),transparent 34%),radial-gradient(circle at 72% 65%,rgba(255,255,255,.12),transparent 36%),linear-gradient(135deg,#fff 0%,#d8d8d8 22%,#6f6f6f 48%,#161616 78%,#000 100%);animation:wavlib-intro .85s cubic-bezier(.65,0,.35,1) forwards}
-@keyframes wavlib-intro{0%{opacity:1}58%{opacity:1}100%{opacity:0;visibility:hidden}}
-@media(prefers-reduced-motion:reduce){body::before{animation:wavlib-intro-reduced .15s linear forwards}@keyframes wavlib-intro-reduced{to{opacity:0;visibility:hidden}}}
-
 /* Authentication is intentionally removed from WAVLIB. */
 .signin-btn,
 .login,
