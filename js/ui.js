@@ -35,8 +35,6 @@
     input.setAttribute('data-1p-ignore', 'true');
     input.setAttribute('role', 'searchbox');
 
-    // Keep the field readonly until the user deliberately clicks it. This prevents
-    // Chrome and password managers from injecting a saved account email into it.
     input.readOnly = true;
 
     const isEmail = (value) => /^\s*[^\s@]+@[^\s@]+\.[^\s@]+\s*$/.test(value || '');
@@ -64,13 +62,32 @@
     input.addEventListener('focus', clearEmail);
     input.addEventListener('input', clearEmail);
 
-    // Catch browser autofill/page restoration without repeatedly touching real searches.
     [0, 100, 300, 600, 1200].forEach((delay) => {
       window.setTimeout(() => {
         if (input.readOnly || isEmail(input.value)) clearEmail();
       }, delay);
     });
     window.addEventListener('pageshow', clearEmail, { passive: true });
+  }
+
+  function setupLegalLinks() {
+    const links = document.querySelectorAll('.legal a');
+    if (!links.length) return;
+
+    const destinations = {
+      terms: 'terms.html',
+      privacy: 'privacy.html',
+      disclaimer: 'disclaimer.html',
+      copyright: 'copyright.html'
+    };
+
+    links.forEach((link) => {
+      const key = link.textContent.trim().toLowerCase();
+      const destination = destinations[key];
+      if (!destination) return;
+      link.setAttribute('href', destination);
+      link.removeAttribute('onclick');
+    });
   }
 
   function setupMobileSidebar() {
@@ -139,6 +156,7 @@
 
   function boot() {
     setupTopSearch();
+    setupLegalLinks();
     setupMobileSidebar();
   }
 
