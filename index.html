@@ -827,18 +827,13 @@ body{
         <span>Favourites</span>
       </a>
     </nav>
-    <button class="signin-btn" onclick="openAuth('signin')">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/><path d="M10 17l5-5-5-5"/><path d="M15 12H3"/></svg>
-      <span>Log in</span>
-    </button>
-    <div class="account-card" id="account-card">
+<div class="account-card" id="account-card">
   <div class="account-avatar" id="account-avatar">Z</div>
   <div class="account-info">
     <div class="account-name" id="account-name">Zahwan</div>
   </div>
   <div class="account-menu-wrap">
-    <button class="account-menu-btn" type="button" aria-label="Account menu" onclick="event.stopPropagation(); toggleAccountMenu()">•••</button>
-    <div class="account-dropdown" id="account-menu">
+<div class="account-dropdown" id="account-menu">
       <button type="button" onclick="event.stopPropagation(); logoutWavlib()">Log out</button>
     </div>
   </div>
@@ -1009,8 +1004,7 @@ body{
     <input id="signin-password" class="field-input" type="password" autocomplete="current-password" placeholder="Your password">
     <div id="signin-password-error" class="auth-error"></div>
     <div id="signin-error" class="auth-error"></div>
-    <button id="signin-submit" class="submit-btn" type="button">Log in</button>
-    <div class="auth-switch">No account? <b onclick="showAuthCard('signup')">Sign up</b></div>
+<div class="auth-switch">No account? <b onclick="showAuthCard('signup')">Sign up</b></div>
   </div>
 
   <div class="auth-card" id="auth-signup" style="display:none;">
@@ -1033,8 +1027,7 @@ body{
     <div id="signup-confirm-error" class="auth-error"></div>
     <div id="signup-error" class="auth-error"></div>
     <div style="font-size:11px;color:var(--text-dim);margin:-6px 0 14px;">By continuing, you agree to the <a href="#" style="color:var(--text-muted);text-decoration:underline;">terms</a> and <a href="#" style="color:var(--text-muted);text-decoration:underline;">privacy policy</a>.</div>
-    <button id="signup-submit" class="submit-btn" type="button">Create account</button>
-    <div class="auth-switch">Already have an account? <b onclick="showAuthCard('signin')">Log in</b></div>
+<div class="auth-switch">Already have an account? <b onclick="showAuthCard('signin')">Log in</b></div>
   </div>
 </div>
 
@@ -1527,18 +1520,7 @@ function getAuthRedirectUrl(){
   }
   return WAVLIB_PRODUCTION_URL;
 }
-function showAuthRedirectError(){
-  const hash=window.location.hash || '';
-  if(!hash.includes('error=')) return;
-  const params=new URLSearchParams(hash.replace(/^#/,''));
-  const description=params.get('error_description');
-  const code=params.get('error_code');
-  if(description || code){
-    showAuthCard('signin');
-    document.getElementById('auth-overlay')?.classList.add('open');
-    setAuthError('signin', decodeURIComponent((description || code || 'Email confirmation failed.').replace(/\+/g,' ')));
-  }
-  history.replaceState(null, document.title, window.location.pathname + window.location.search);
+history.replaceState(null, document.title, window.location.pathname + window.location.search);
 }
 
 function setAuthBusy(button, busy, busyText){
@@ -1547,25 +1529,7 @@ function setAuthBusy(button, busy, busyText){
   button.disabled = busy;
   button.textContent = busy ? busyText : button.dataset.originalText;
 }
-function applySupabaseUser(user){
-  isLoggedIn = !!user;
-
-  const fav = document.querySelector('.favorites-nav');
-  const login = document.querySelector('.signin-btn');
-  const account = document.getElementById('account-card');
-  const nameEl = document.getElementById('account-name');
-  const avatarEl = document.getElementById('account-avatar');
-
-  if(user){
-    localStorage.setItem('wavlib_logged_in','1');
-    const displayName = user.user_metadata?.username || user.email?.split('@')[0] || 'WAVLIB user';
-    if(nameEl) nameEl.textContent = displayName;
-    if(avatarEl) avatarEl.textContent = displayName.charAt(0).toUpperCase();
-    if(fav) fav.style.display = 'flex';
-    if(login) login.style.display = 'none';
-    if(account) account.classList.add('show');
-    renderFavorites();
-  }else{
+else{
     localStorage.removeItem('wavlib_logged_in');
     if(fav) fav.style.display = 'none';
     if(login) login.style.display = 'flex';
@@ -1584,7 +1548,7 @@ async function signInWithEmail(){
   if(!password){ setFieldError('signin-password','signin-password-error','Please enter your password.'); return; }
 
   setAuthBusy(button, true, 'Logging in…');
-  const {data, error} = await wavlibSupabase.auth.signInWithPassword({email, password});
+
   setAuthBusy(button, false);
 
   if(error){
@@ -1689,17 +1653,12 @@ document.getElementById('signup-confirm-password')?.addEventListener('input', ()
   if(password===confirm) document.getElementById('signup-confirm-password')?.classList.add('valid');
 });
 applySupabaseUser(null);
-
-function toggleAccountMenu(){
-  const menu=document.getElementById('account-menu');
-  if(menu) menu.classList.toggle('open');
-}
 document.addEventListener('click', function(e){
   const menu=document.getElementById('account-menu');
   if(menu && !e.target.closest('.account-menu-wrap')) menu.classList.remove('open');
 });
 async function logoutWavlib(){
-  const {error} = await wavlibSupabase.auth.signOut();
+
   if(error){
     authMessage(error.message);
     return;
