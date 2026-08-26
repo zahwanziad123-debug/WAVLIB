@@ -1,0 +1,84 @@
+name: WAVLIB stability repair
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - '.github/workflows/wavlib-stability.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    if: ${{ !contains(github.event.head_commit.message, '[wavlib-auto]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Apply deep runtime stability fixes
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+
+          # 1) Make third-party fonts non-blocking and bust stale CSS/JS caches.
+          s = s.replace(
+              '<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">',
+              '<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" media="print" onload="this.media=\'all\'">'
+          )
+          s = re.sub(r'href="css/animations\.css(?:\?[^\"]*)?"', 'href="css/animations.css?v=20260826-3"', s, count=1)
+          s = re.sub(r'src="js/ui\.js(?:\?[^\"]*)?"', 'src="js/ui.js?v=20260826-3"', s, count=1)
+
+          # 2) Remove the synchronous Supabase CDN dependency. Authentication is hidden in WAVLIB,
+          # so the public sample library must never depend on a third-party auth script to boot.
+          s = re.sub(
+              r'<script src="https://cdn\.jsdelivr\.net/npm/@supabase/supabase-js@2"></script>\s*<script>\s*/\* Supabase connection \*/.*?</script>',
+              '''<script>\n/* WAVLIB auth is intentionally disabled. Keep a tiny local compatibility object so optional\n   auth handlers cannot prevent the main library from rendering when a CDN is unavailable. */\nconst wavlibSupabase = {\n  auth: {\n    getSession: async () => ({ data: { session: null } }),\n    onAuthStateChange: () => ({ data: { subscription: { unsubscribe() {} } } }),\n    signInWithPassword: async () => ({ data: { user: null }, error: { message: 'Authentication is disabled.' } }),\n    signUp: async () => ({ data: { user: null, session: null }, error: { message: 'Authentication is disabled.' } }),\n    signOut: async () => ({ error: null })\n  }\n};\n</script>''',
+              s,
+              count=1,
+              flags=re.S
+          )
+
+          # 3) Remove auth boot calls that do unnecessary work on every page load.
+          s = re.sub(
+              r'\s*showAuthRedirectError\(\);\s*wavlibSupabase\.auth\.getSession\(\)\.then\(\(\{data\}\)=>\{.*?\}\);\s*wavlibSupabase\.auth\.onAuthStateChange\((_event, session\)=>\{.*?\}\);',
+              '\napplySupabaseUser(null);',
+              s,
+              count=1,
+              flags=re.S
+          )
+
+          # 4) Hard-disable any legacy splash overlay in the page itself. This wins over stale CSS.
+          marker = '<style id="wavlib-stability-overrides">'
+          override = '''<style id="wavlib-stability-overrides">\n  /* Never block the application with an intro/splash overlay. */\n  body::before, body::after { display:none !important; content:none !important; animation:none !important; }\n  /* Keep large sample lists cheap to paint. */\n  .pack-card, .track-row { contain: layout paint style; }\n  .pack-row, .pack-grid, .track-list { contain: layout paint; }\n  @media (prefers-reduced-motion: reduce) { * { animation-duration:0.001ms !important; transition-duration:0.001ms !important; } }\n</style>\n'''
+          if marker not in s:
+              s = s.replace('</head>', marker + '\n' + override + '</head>', 1)
+
+          p.write_text(s, encoding='utf-8')
+
+          # 5) Ensure ui.js remains lightweight and contains no MutationObserver cleanup loop.
+          ui = Path('js/ui.js')
+          u = ui.read_text(encoding='utf-8')
+          u = re.sub(r'\n\s*function removeAuthUi\(\).*?\n\s*function boot\(\)', '\n\n  function boot()', u, flags=re.S)
+          u = re.sub(r'\n\s*function clearEmailAutofill\(\).*?\n\s*function boot\(\)', '\n\n  function boot()', u, flags=re.S)
+          u = re.sub(r'\n\s*function removeAuthAndAutofill\(\).*?\n\s*function boot\(\)', '\n\n  function boot()', u, flags=re.S)
+          u = re.sub(r'\n\s*removeAuthAndAutofill\(\);.*?\n\s*}\n\s*\n\s*if \(document\.readyState', '\n  }\n\n  if (document.readyState', u, flags=re.S)
+          u = re.sub(r'\n\s*const observer = new MutationObserver\(.*?observer\.observe\(.*?\);', '', u, flags=re.S)
+          ui.write_text(u, encoding='utf-8')
+
+          # 6) Static Pages deployment should never run Jekyll processing.
+          Path('.nojekyll').write_text('', encoding='utf-8')
+
+      - name: Commit repair
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html js/ui.js .nojekyll
+          git diff --cached --quiet && exit 0
+          git commit -m "Deep WAVLIB stability repair [wavlib-auto]"
+          git push
