@@ -2,60 +2,19 @@
 @media (max-width:768px) {
   html,body{overflow-x:hidden!important}
   .content{min-width:0!important;max-width:100%!important}
+  .view.active{display:block!important;visibility:visible!important;opacity:1!important;width:100%!important;min-width:0!important;max-width:100%!important;height:auto!important;overflow:visible!important}
+  .view:not(.active){visibility:hidden!important}
   .content>*,.view,.view.active,.pack-card,.track-row,.track-info,.filter-bar{min-width:0!important;max-width:100%!important}
   .pack-detail,.pack-detail-description,.pack-detail-tags,.pack-detail-meta{min-width:0!important;max-width:100%!important;overflow-wrap:anywhere}
   .pack-detail-hero{width:100%!important;max-width:100%!important}
   .pack-action,.sort-select,.pack-search{max-width:100%!important}
   .genre-pills,.chip-row,.packs-toolbar,.pack-samples-head,.pack-search-row,.pack-detail-actions{min-width:0!important;max-width:100%!important;flex-wrap:wrap!important}
-
-  /* Search tab: reserve a full row below the mobile menu button so the first search field never sits underneath it. */
+  .pack-grid,.packs-grid,.pack-list,.samples-grid,.sample-list,.track-list,.pack-samples,.pack-samples-list{width:100%!important;min-width:0!important;max-width:100%!important;visibility:visible!important;opacity:1!important}
+  .pack-grid,.packs-grid,.samples-grid{grid-template-columns:minmax(0,1fr)!important}
+  .pack-card,.track-row{visibility:visible!important;opacity:1!important}
   body.wavlib-mobile-search-tab .content{padding-top:72px!important}
-
-  /* Keep the mobile menu control in the header safe area and away from the Search field. */
-  .mobile-menu-toggle{
-    top:max(8px,env(safe-area-inset-top))!important;
-    left:max(10px,env(safe-area-inset-left))!important;
-    right:auto!important;
-  }
-
-  /* Keep the close X completely inside the drawer, including on narrow/notched phones. */
-  .sidebar .mobile-sidebar-close{
-    position:absolute!important;
-    top:max(8px,env(safe-area-inset-top))!important;
-    right:max(8px,env(safe-area-inset-right))!important;
-    left:auto!important;
-    width:40px!important;
-    height:40px!important;
-    min-width:40px!important;
-    min-height:40px!important;
-    margin:0!important;
-    box-sizing:border-box!important;
-    z-index:20!important;
-  }
-
-  /* Legal links stay visible in the mobile drawer. */
-  .sidebar .legal{
-    display:flex!important;
-    width:100%!important;
-    max-width:100%!important;
-    flex-wrap:wrap!important;
-    align-items:center!important;
-    justify-content:flex-start!important;
-    gap:10px 14px!important;
-    margin-top:auto!important;
-    margin-right:0!important;
-    margin-left:0!important;
-    padding-left:4px!important;
-    padding-right:4px!important;
-    padding-bottom:max(6px,env(safe-area-inset-bottom))!important;
-    overflow:visible!important;
-  }
-
-  .sidebar .legal a{
-    display:inline-block!important;
-    flex:0 0 auto!important;
-    font-size:11px!important;
-    line-height:1.2!important;
-    white-space:nowrap!important;
-  }
+  .mobile-menu-toggle{top:max(8px,env(safe-area-inset-top))!important;left:max(10px,env(safe-area-inset-left))!important;right:auto!important}
+  .sidebar .mobile-sidebar-close{position:absolute!important;top:max(8px,env(safe-area-inset-top))!important;right:max(8px,env(safe-area-inset-right))!important;left:auto!important;width:40px!important;height:40px!important;min-width:40px!important;min-height:40px!important;margin:0!important;box-sizing:border-box!important;z-index:20!important}
+  .sidebar .legal{display:flex!important;width:100%!important;max-width:100%!important;flex-wrap:wrap!important;align-items:center!important;justify-content:flex-start!important;gap:10px 14px!important;margin-top:auto!important;margin-right:0!important;margin-left:0!important;padding-left:4px!important;padding-right:4px!important;padding-bottom:max(6px,env(safe-area-inset-bottom))!important;overflow:visible!important}
+  .sidebar .legal a{display:inline-block!important;flex:0 0 auto!important;font-size:11px!important;line-height:1.2!important;white-space:nowrap!important}
 }
