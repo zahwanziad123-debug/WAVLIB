@@ -1,4 +1,4 @@
-/* WAVLIB mobile drawer: compact, polished, no overflow. */
+/* WAVLIB mobile drawer: compact, polished, no blur. */
 .mobile-menu-toggle,
 .mobile-sidebar-close,
 .mobile-sidebar-scrim{
@@ -21,11 +21,9 @@
     justify-content:center;
     border:1px solid rgba(255,255,255,.12);
     border-radius:13px;
-    background:rgba(16,16,16,.88);
+    background:#101010;
     color:#fff;
     box-shadow:0 8px 28px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.06);
-    backdrop-filter:blur(14px);
-    -webkit-backdrop-filter:blur(14px);
     cursor:pointer;
     touch-action:manipulation;
   }
@@ -42,8 +40,6 @@
     visibility:hidden;
     pointer-events:none;
     transition:opacity .24s ease,visibility .24s ease;
-    backdrop-filter:blur(3px);
-    -webkit-backdrop-filter:blur(3px);
   }
 
   .sidebar{
@@ -67,7 +63,7 @@
     overflow:hidden!important;
     border:0!important;
     border-right:1px solid rgba(255,255,255,.1)!important;
-    background:rgba(9,9,9,.97)!important;
+    background:#090909!important;
     box-shadow:18px 0 55px rgba(0,0,0,.48)!important;
     transform:translateX(-105%)!important;
     transition:transform .28s cubic-bezier(.22,.8,.22,1)!important;
@@ -178,7 +174,6 @@
     z-index:3200!important;
   }
 
-  /* Prevent browser selection/focus blue from looking like a UI element. */
   ::selection{background:rgba(255,255,255,.16);color:#fff}
   button:focus,a:focus,input:focus,select:focus{outline:none!important;box-shadow:none!important}
 }
