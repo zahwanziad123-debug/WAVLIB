@@ -77,7 +77,6 @@
     const observer = new MutationObserver(clean);
     if (document.body) observer.observe(document.body, { childList: true, subtree: true });
 
-    // Disable the legacy account/auth object at runtime while leaving any storage namespace intact.
     try {
       if (typeof wavlibSupabase !== 'undefined' && wavlibSupabase && wavlibSupabase.auth) {
         wavlibSupabase.auth = undefined;
@@ -222,6 +221,31 @@
     });
   }
 
+  function setupMobileSearchLayout() {
+    const sync = () => {
+      if (window.innerWidth > MOBILE_BREAKPOINT) {
+        document.body.classList.remove('wavlib-mobile-search-tab');
+        return;
+      }
+
+      const active = Array.from(document.querySelectorAll('.nav-item.active'))
+        .some((item) => item.textContent.trim().toLowerCase().includes('search'));
+      document.body.classList.toggle('wavlib-mobile-search-tab', active);
+    };
+
+    sync();
+
+    const observer = new MutationObserver(sync);
+    observer.observe(document.body, {
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['class']
+    });
+
+    window.addEventListener('resize', sync, { passive: true });
+    window.addEventListener('orientationchange', sync, { passive: true });
+  }
+
   function setupMobileSidebar() {
     const sidebar = document.querySelector('.sidebar');
     const nav = sidebar?.querySelector('.nav');
@@ -288,6 +312,7 @@
     setupMobileSidebar();
     watchPackSampleSearch();
     setupLegalLinks();
+    setupMobileSearchLayout();
   }
 
   if (document.readyState === 'loading') {
