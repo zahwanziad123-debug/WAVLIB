@@ -34,7 +34,6 @@
     input.setAttribute('data-lpignore', 'true');
     input.setAttribute('data-1p-ignore', 'true');
     input.setAttribute('role', 'searchbox');
-
     input.readOnly = true;
 
     const isEmail = (value) => /^\s*[^\s@]+@[^\s@]+\.[^\s@]+\s*$/.test(value || '');
@@ -85,7 +84,6 @@
     input.setAttribute('data-lpignore', 'true');
     input.setAttribute('data-1p-ignore', 'true');
     input.setAttribute('aria-label', 'Search samples in this pack');
-
     input.readOnly = true;
 
     const isEmail = (value) => /^\s*[^\s@]+@[^\s@]+\.[^\s@]+\s*$/.test(value || '');
@@ -108,6 +106,7 @@
       input.readOnly = false;
       input.removeAttribute('readonly');
       input.focus({ preventScroll: true });
+      window.clearInterval(autofillGuard);
     };
 
     input.addEventListener('pointerdown', activateSearch, { once: true });
@@ -120,6 +119,14 @@
     [0, 100, 300, 600, 1200, 2000].forEach((delay) => {
       window.setTimeout(clearEmail, delay);
     });
+
+    const autofillGuard = window.setInterval(() => {
+      if (!document.documentElement.contains(input)) {
+        window.clearInterval(autofillGuard);
+        return;
+      }
+      if (input.readOnly) clearEmail();
+    }, 250);
 
     return true;
   }
