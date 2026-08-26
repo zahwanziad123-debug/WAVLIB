@@ -1,0 +1,104 @@
+name: WAVLIB requested account/email cleanup
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  cleanup:
+    if: "!contains(github.event.head_commit.message, '[wavlib-cleanup]')"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Apply only requested account/email cleanup
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('js/ui.js')
+          s = p.read_text(encoding='utf-8')
+          marker = '  function boot() {'
+          if 'function setupAccountAndEmailCleanup()' not in s:
+              insert = r'''  function setupAccountAndEmailCleanup() {
+    const SUPPORT_EMAIL = 'wavlib.support@gmail.com';
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const accountPattern = /(?:^|\s)(?:log\s*in|login|sign\s*in|signin|sign\s*up|signup|register|account|my\s+account|authentication|auth)(?:\s|$)/i;
+
+    const isEmail = (value) => emailPattern.test(String(value || '').trim());
+
+    const cleanInput = (input) => {
+      if (!(input instanceof HTMLInputElement || input instanceof HTMLTextAreaElement)) return;
+      const value = String(input.value || '').trim();
+      if (value && value.toLowerCase() !== SUPPORT_EMAIL && isEmail(value)) {
+        input.value = '';
+        input.removeAttribute('value');
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+        input.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+      input.setAttribute('autocomplete', 'off');
+      input.setAttribute('autocorrect', 'off');
+      input.setAttribute('autocapitalize', 'off');
+      input.setAttribute('spellcheck', 'false');
+      input.setAttribute('data-form-type', 'other');
+      input.setAttribute('data-lpignore', 'true');
+      input.setAttribute('data-1p-ignore', 'true');
+    };
+
+    const unlinkAccountControls = (root = document) => {
+      root.querySelectorAll?.('a, button, [role="button"]').forEach((el) => {
+        if (el.closest('.legal')) return;
+        const text = [el.textContent, el.getAttribute('aria-label'), el.getAttribute('title'), el.getAttribute('href')]
+          .filter(Boolean).join(' ');
+        if (accountPattern.test(text)) {
+          el.removeAttribute('href');
+          el.removeAttribute('onclick');
+          el.removeAttribute('role');
+          el.setAttribute('aria-hidden', 'true');
+          el.style.display = 'none';
+        }
+      });
+    };
+
+    const cleanAll = () => {
+      document.querySelectorAll('input, textarea').forEach(cleanInput);
+      unlinkAccountControls(document);
+    };
+
+    cleanAll();
+    window.addEventListener('pageshow', cleanAll, { passive: true });
+    window.addEventListener('focus', cleanAll, { passive: true });
+    document.addEventListener('input', (event) => cleanInput(event.target), true);
+    document.addEventListener('change', (event) => cleanInput(event.target), true);
+    document.addEventListener('focusin', (event) => cleanInput(event.target), true);
+
+    const observer = new MutationObserver(() => cleanAll());
+    if (document.body) observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['value', 'href', 'aria-label', 'title'] });
+
+    [0, 100, 300, 600, 1200, 2000, 4000].forEach((delay) => window.setTimeout(cleanAll, delay));
+  }
+
+'''
+              if marker not in s:
+                  raise SystemExit('boot marker not found')
+              s = s.replace(marker, insert + marker, 1)
+          old = "    setupLegalLinks();\n"
+          new = "    setupLegalLinks();\n    setupAccountAndEmailCleanup();\n"
+          if 'setupAccountAndEmailCleanup();' not in s:
+              if old not in s:
+                  raise SystemExit('legal setup marker not found')
+              s = s.replace(old, new, 1)
+          p.write_text(s, encoding='utf-8')
+          PY
+
+      - name: Commit requested cleanup and remove temporary workflow
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add js/ui.js .github/workflows/wavlib-requested-cleanup.yml
+          git rm .github/workflows/wavlib-requested-cleanup.yml
+          git commit -m '[wavlib-cleanup] remove account links and email autofill'
+          git push
