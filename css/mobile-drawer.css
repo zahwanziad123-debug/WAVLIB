@@ -1,0 +1,194 @@
+/* WAVLIB mobile drawer: compact, polished, no overflow. */
+.mobile-menu-toggle,
+.mobile-sidebar-close,
+.mobile-sidebar-scrim{
+  display:none;
+}
+
+@media (max-width:768px){
+  html,body{ -webkit-tap-highlight-color:transparent; }
+  button,a,input,select{ -webkit-tap-highlight-color:transparent; }
+
+  .mobile-menu-toggle{
+    display:flex;
+    position:fixed;
+    top:max(12px,env(safe-area-inset-top));
+    left:12px;
+    z-index:3100;
+    width:42px;
+    height:42px;
+    align-items:center;
+    justify-content:center;
+    border:1px solid rgba(255,255,255,.12);
+    border-radius:13px;
+    background:rgba(16,16,16,.88);
+    color:#fff;
+    box-shadow:0 8px 28px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.06);
+    backdrop-filter:blur(14px);
+    -webkit-backdrop-filter:blur(14px);
+    cursor:pointer;
+    touch-action:manipulation;
+  }
+  .mobile-menu-toggle svg,.mobile-sidebar-close svg{width:20px;height:20px;display:block}
+  .mobile-menu-toggle:active,.mobile-sidebar-close:active{transform:scale(.94)}
+
+  .mobile-sidebar-scrim{
+    display:block;
+    position:fixed;
+    inset:0;
+    z-index:2950;
+    background:rgba(0,0,0,.52);
+    opacity:0;
+    visibility:hidden;
+    pointer-events:none;
+    transition:opacity .24s ease,visibility .24s ease;
+    backdrop-filter:blur(3px);
+    -webkit-backdrop-filter:blur(3px);
+  }
+
+  .sidebar{
+    position:fixed!important;
+    left:0!important;
+    top:0!important;
+    bottom:0!important;
+    z-index:3000!important;
+    width:min(82vw,300px)!important;
+    max-width:300px!important;
+    height:100dvh!important;
+    max-height:100dvh!important;
+    min-height:100dvh!important;
+    margin:0!important;
+    padding:max(18px,env(safe-area-inset-top)) 16px max(18px,env(safe-area-inset-bottom))!important;
+    display:flex!important;
+    flex-direction:column!important;
+    align-items:stretch!important;
+    justify-content:flex-start!important;
+    gap:0!important;
+    overflow:hidden!important;
+    border:0!important;
+    border-right:1px solid rgba(255,255,255,.1)!important;
+    background:rgba(9,9,9,.97)!important;
+    box-shadow:18px 0 55px rgba(0,0,0,.48)!important;
+    transform:translateX(-105%)!important;
+    transition:transform .28s cubic-bezier(.22,.8,.22,1)!important;
+    will-change:transform;
+  }
+
+  body.mobile-sidebar-open .sidebar{transform:translateX(0)!important}
+  body.mobile-sidebar-open .mobile-sidebar-scrim{opacity:1;visibility:visible;pointer-events:auto}
+  body.mobile-sidebar-open .mobile-menu-toggle{opacity:0;pointer-events:none}
+  body.mobile-sidebar-open{overflow:hidden!important}
+
+  .logo{
+    flex:0 0 auto!important;
+    width:100%!important;
+    max-width:none!important;
+    height:86px!important;
+    min-height:86px!important;
+    margin:0 0 14px!important;
+    padding:0 50px 0 4px!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:flex-start!important;
+    position:relative!important;
+    overflow:visible!important;
+  }
+  .brand-logo{
+    display:block!important;
+    width:132px!important;
+    max-width:132px!important;
+    height:auto!important;
+    max-height:64px!important;
+    object-fit:contain!important;
+    object-position:left center!important;
+  }
+
+  .mobile-sidebar-close{
+    display:flex;
+    position:absolute;
+    top:0;
+    right:0;
+    width:40px;
+    height:40px;
+    align-items:center;
+    justify-content:center;
+    border:1px solid rgba(255,255,255,.11);
+    border-radius:12px;
+    background:rgba(255,255,255,.055);
+    color:#fff;
+    cursor:pointer;
+    touch-action:manipulation;
+  }
+
+  .nav{
+    flex:0 1 auto!important;
+    width:100%!important;
+    max-width:100%!important;
+    height:auto!important;
+    min-height:0!important;
+    display:flex!important;
+    flex-direction:column!important;
+    align-items:stretch!important;
+    gap:6px!important;
+    overflow:visible!important;
+    padding:0!important;
+    margin:0!important;
+  }
+  .nav-item{
+    flex:0 0 48px!important;
+    width:100%!important;
+    max-width:100%!important;
+    min-height:48px!important;
+    height:48px!important;
+    padding:0 14px!important;
+    margin:0!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:flex-start!important;
+    gap:12px!important;
+    border-radius:14px!important;
+    white-space:nowrap!important;
+    font-size:14px!important;
+    line-height:1!important;
+    transform:none!important;
+  }
+  .nav-item svg{width:19px!important;height:19px!important;flex:0 0 19px!important}
+  .nav-item.active{background:rgba(255,255,255,.085)!important;color:#fff!important}
+
+  .signin-btn{
+    flex:0 0 44px!important;
+    width:100%!important;
+    min-width:0!important;
+    height:44px!important;
+    margin:12px 0 0!important;
+    padding:0 14px!important;
+    font-size:13px!important;
+    border-radius:13px!important;
+  }
+  .legal{display:none!important}
+
+  .main{width:100%!important;max-width:100%!important}
+  .topbar{padding-left:62px!important;padding-right:12px!important}
+
+  .filter-panel{
+    left:12px!important;
+    right:12px!important;
+    width:auto!important;
+    max-width:calc(100vw - 24px)!important;
+    z-index:3200!important;
+  }
+
+  /* Prevent browser selection/focus blue from looking like a UI element. */
+  ::selection{background:rgba(255,255,255,.16);color:#fff}
+  button:focus,a:focus,input:focus,select:focus{outline:none!important;box-shadow:none!important}
+}
+
+@media (max-width:380px){
+  .sidebar{width:min(88vw,290px)!important}
+  .brand-logo{width:122px!important;max-width:122px!important}
+  .logo{height:78px!important;min-height:78px!important}
+}
+
+@media (prefers-reduced-motion:reduce){
+  .sidebar,.mobile-sidebar-scrim,.mobile-menu-toggle,.mobile-sidebar-close{transition:none!important}
+}
