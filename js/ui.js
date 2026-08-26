@@ -16,6 +16,20 @@
     return svg;
   }
 
+  function setupTopSearch() {
+    const input = document.querySelector('.topbar .search-input');
+    if (!input || input.dataset.wavlibSearchReady === '1') return;
+
+    // The topbar search must never contain the account email.
+    input.dataset.wavlibSearchReady = '1';
+    input.value = '';
+    input.removeAttribute('value');
+    input.placeholder = 'Search sounds by genre, mood, instrument, BPM, key...';
+    input.setAttribute('aria-label', 'Search sounds');
+    input.setAttribute('autocomplete', 'off');
+    input.setAttribute('name', 'search');
+  }
+
   function setupMobileSidebar() {
     const sidebar = document.querySelector('.sidebar');
     const nav = sidebar?.querySelector('.nav');
@@ -81,6 +95,7 @@
   }
 
   function boot() {
+    setupTopSearch();
     setupMobileSidebar();
   }
 
