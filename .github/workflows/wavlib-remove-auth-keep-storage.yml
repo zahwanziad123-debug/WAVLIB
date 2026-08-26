@@ -28,44 +28,6 @@ jobs:
           personal_email = 'zahwanziad.123@gmail.com'
           support_email = 'wavlib.support@gmail.com'
 
-          def clean_text(path: Path, text: str) -> str:
-              original = text
-
-              # Remove the personal/account email everywhere. Never remove the support address.
-              text = text.replace(personal_email, '')
-
-              # Remove Supabase Auth CDN/client bootstrapping while leaving Storage code alone.
-              text = re.sub(r'<script[^>]+src=["\']https://cdn\.jsdelivr\.net/npm/@supabase/supabase-js@[^"\']+["\'][^>]*></script>\s*', '', text, flags=re.I)
-              text = re.sub(r'<script[^>]*>\s*/\*\s*Supabase connection\s*\*/.*?</script>\s*', '', text, flags=re.I | re.S)
-
-              # Remove obvious auth-only JavaScript statements/functions, but do not touch storage.
-              auth_tokens = ('supabase.auth', '.auth.', 'signIn', 'signUp', 'signOut', 'getSession',
-                             'onAuthStateChange', 'applySupabaseUser', 'showAuthRedirectError',
-                             'toggleAccountMenu', 'authModal', 'loginModal', 'signin', 'signup',
-                             'registerAccount', 'currentUser', 'sessionUser')
-              lines = text.splitlines(True)
-              kept = []
-              skip = 0
-              for line in lines:
-                  if skip:
-                      skip -= 1
-                      continue
-                  low = line.lower()
-                  if any(token.lower() in low for token in auth_tokens):
-                      # Remove simple one-line auth code. Preserve support/legal text.
-                      if support_email.lower() in low:
-                          kept.append(line)
-                      continue
-                  kept.append(line)
-              text = ''.join(kept)
-
-              # Remove common account/login/sign-up HTML controls without touching legal links.
-              text = re.sub(r'\s*<button[^>]*(?:class|id|aria-label|title)=["\'][^"\']*(?:sign[- ]?in|log[- ]?in|sign[- ]?up|account|register)[^"\']*["\'][^>]*>.*?</button>\s*', '\n', text, flags=re.I | re.S)
-              text = re.sub(r'\s*<a[^>]*(?:class|id|aria-label|title|href)=["\'][^"\']*(?:sign[- ]?in|log[- ]?in|sign[- ]?up|account|register|auth)[^"\']*["\'][^>]*>.*?</a>\s*', '\n', text, flags=re.I | re.S)
-
-              return text if text != original else original
-
-          changed = []
           for path in root.rglob('*'):
               if not path.is_file() or '.git' in path.parts or path.suffix.lower() not in text_exts:
                   continue
@@ -73,15 +35,48 @@ jobs:
                   text = path.read_text(encoding='utf-8')
               except UnicodeDecodeError:
                   continue
-              new = clean_text(path, text)
-              if new != text:
-                  path.write_text(new, encoding='utf-8')
-                  changed.append(str(path))
+              original = text
 
-          print('Changed:', *changed, sep='\n')
+              # Remove the personal/account email everywhere. Keep the support address only.
+              text = text.replace(personal_email, '')
 
-          # Keep only the support address as a literal email in the website source.
-          leftovers = []
+              # Remove Supabase Auth CDN/bootstrap code; do not remove supabase.storage usage.
+              text = re.sub(r'<script[^>]+src=["\']https://cdn\.jsdelivr\.net/npm/@supabase/supabase-js@[^"\']+["\'][^>]*></script>\s*', '', text, flags=re.I)
+              text = re.sub(r'<script[^>]*>\s*/\*\s*Supabase connection\s*\*/.*?</script>\s*', '', text, flags=re.I | re.S)
+
+              # Remove complete obvious auth function blocks where the source has them as named functions.
+              for name in ('showAuthRedirectError', 'toggleAccountMenu', 'applySupabaseUser'):
+                  text = re.sub(r'\n\s*(?:async\s+)?function\s+' + re.escape(name) + r'\s*\([^)]*\)\s*\{.*?\n\s*\}\s*', '\n', text, flags=re.S)
+
+              # Remove individual auth API calls without touching storage.
+              text = re.sub(r'^.*\bsupabase\.auth\.[^;\n]*;?.*$', '', text, flags=re.I | re.M)
+              text = re.sub(r'^.*\b(?:signIn|signUp|signOut|onAuthStateChange|getSession)\s*\([^;\n]*\)\s*;?.*$', '', text, flags=re.I | re.M)
+
+              # Remove account/login/signup controls from HTML. Legal links are not account controls.
+              text = re.sub(r'\s*<button[^>]*(?:class|id|aria-label|title)=["\'][^"\']*(?:sign[- ]?in|log[- ]?in|sign[- ]?up|account|register)[^"\']*["\'][^>]*>.*?</button>\s*', '\n', text, flags=re.I | re.S)
+              text = re.sub(r'\s*<a[^>]*(?:class|id|aria-label|title|href)=["\'][^"\']*(?:sign[- ]?in|log[- ]?in|sign[- ]?up|account|register|auth)[^"\']*["\'][^>]*>.*?</a>\s*', '\n', text, flags=re.I | re.S)
+
+              # Make every search/input field resistant to browser account autofill.
+              if path.name == 'ui.js':
+                  text = text.replace("input.setAttribute('autocomplete', 'off');", "input.setAttribute('autocomplete', 'new-password');", 2)
+                  if 'function setupGlobalEmailRemoval()' not in text:
+                      marker = '  function boot() {'
+                      fn = '''  function setupGlobalEmailRemoval() {\n    const emailPattern = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;\n    const clean = () => {\n      document.querySelectorAll('input, textarea').forEach((input) => {\n        input.setAttribute('autocomplete', 'new-password');\n        input.setAttribute('data-form-type', 'other');\n        input.setAttribute('data-lpignore', 'true');\n        input.setAttribute('data-1p-ignore', 'true');\n        const value = String(input.value || '').trim();\n        if (emailPattern.test(value)) {\n          input.value = '';\n          input.removeAttribute('value');\n          input.dispatchEvent(new Event('input', { bubbles: true }));\n        }\n      });\n    };\n    clean();\n    document.addEventListener('input', clean, true);\n    document.addEventListener('change', clean, true);\n    document.addEventListener('focusin', clean, true);\n    window.addEventListener('pageshow', clean, { passive: true });\n    [0, 100, 250, 500, 1000, 2000, 4000, 8000].forEach((delay) => window.setTimeout(clean, delay));\n    window.setInterval(clean, 300);\n  }\n\n'''
+                      text = text.replace(marker, fn + marker, 1)
+                      text = text.replace('    setupTopSearch();', '    setupGlobalEmailRemoval();\n    setupTopSearch();', 1)
+
+              if text != original:
+                  path.write_text(text, encoding='utf-8')
+                  print('changed', path)
+
+          # Bump the JS URL so the browser cannot keep the previous cached cleaner.
+          index = root / 'index.html'
+          if index.exists():
+              text = index.read_text(encoding='utf-8')
+              text = text.replace('js/ui.js?v=20260826-4', 'js/ui.js?v=20260826-5')
+              index.write_text(text, encoding='utf-8')
+
+          # Report any email literal other than the support address.
           email_re = re.compile(r'[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}')
           for path in root.rglob('*'):
               if not path.is_file() or '.git' in path.parts or path.suffix.lower() not in text_exts:
@@ -90,10 +85,9 @@ jobs:
                   text = path.read_text(encoding='utf-8')
               except UnicodeDecodeError:
                   continue
-              for match in email_re.findall(text):
-                  if match.lower() != support_email.lower():
-                      leftovers.append((str(path), match))
-          print('Non-support email literals remaining:', leftovers)
+              bad = [m for m in email_re.findall(text) if m.lower() != support_email.lower()]
+              if bad:
+                  print('NON_SUPPORT_EMAIL', path, bad)
 
       - name: Commit cleanup and remove this one-time workflow
         shell: bash
