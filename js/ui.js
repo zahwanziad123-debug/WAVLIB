@@ -35,6 +35,8 @@
     input.setAttribute('data-1p-ignore', 'true');
     input.setAttribute('role', 'searchbox');
 
+    // Keep the field readonly until the user deliberately clicks it. This prevents
+    // Chrome and password managers from injecting a saved account email into it.
     input.readOnly = true;
 
     const isEmail = (value) => /^\s*[^\s@]+@[^\s@]+\.[^\s@]+\s*$/.test(value || '');
@@ -62,6 +64,7 @@
     input.addEventListener('focus', clearEmail);
     input.addEventListener('input', clearEmail);
 
+    // Catch browser autofill/page restoration without repeatedly touching real searches.
     [0, 100, 300, 600, 1200].forEach((delay) => {
       window.setTimeout(() => {
         if (input.readOnly || isEmail(input.value)) clearEmail();
@@ -70,24 +73,46 @@
     window.addEventListener('pageshow', clearEmail, { passive: true });
   }
 
-  function setupLegalLinks() {
-    const links = document.querySelectorAll('.legal a');
-    if (!links.length) return;
+  function setupPackSampleSearch() {
+    const input = document.getElementById('pack-sample-query');
+    if (!input || input.dataset.wavlibPackSearchReady === '1') return Boolean(input);
 
-    const destinations = {
-      terms: 'terms.html',
-      privacy: 'privacy.html',
-      disclaimer: 'disclaimer.html',
-      copyright: 'copyright.html'
+    input.dataset.wavlibPackSearchReady = '1';
+    input.type = 'search';
+    input.name = 'wavlib_pack_query_91b4d6';
+    input.setAttribute('autocomplete', 'off');
+    input.setAttribute('autocorrect', 'off');
+    input.setAttribute('autocapitalize', 'off');
+    input.setAttribute('spellcheck', 'false');
+    input.setAttribute('data-form-type', 'other');
+    input.setAttribute('data-lpignore', 'true');
+    input.setAttribute('data-1p-ignore', 'true');
+    input.setAttribute('aria-label', 'Search samples in this pack');
+
+    const isEmail = (value) => /^\s*[^\s@]+@[^\s@]+\.[^\s@]+\s*$/.test(value || '');
+    const clearEmail = () => {
+      if (isEmail(input.value)) input.value = '';
     };
 
-    links.forEach((link) => {
-      const key = link.textContent.trim().toLowerCase();
-      const destination = destinations[key];
-      if (!destination) return;
-      link.setAttribute('href', destination);
-      link.removeAttribute('onclick');
+    clearEmail();
+    input.addEventListener('focus', clearEmail);
+    input.addEventListener('input', clearEmail);
+    window.addEventListener('pageshow', clearEmail, { passive: true });
+
+    // Chrome can restore/autofill a value shortly after dynamically creating the field.
+    [0, 100, 300, 600, 1200].forEach((delay) => {
+      window.setTimeout(clearEmail, delay);
     });
+
+    return true;
+  }
+
+  function watchPackSampleSearch() {
+    if (setupPackSampleSearch()) return;
+    const observer = new MutationObserver(() => {
+      if (setupPackSampleSearch()) observer.disconnect();
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
   }
 
   function setupMobileSidebar() {
@@ -156,8 +181,8 @@
 
   function boot() {
     setupTopSearch();
-    setupLegalLinks();
     setupMobileSidebar();
+    watchPackSampleSearch();
   }
 
   if (document.readyState === 'loading') {
