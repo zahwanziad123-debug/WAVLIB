@@ -1,4 +1,4 @@
-/* WAVLIB UI helpers. Mobile navigation is kept isolated from desktop behavior. */
+/* WAVLIB UI helpers. Mobile drawer only; existing WAVLIB navigation remains authoritative. */
 (() => {
   'use strict';
   const MOBILE_BREAKPOINT = 768;
@@ -51,8 +51,6 @@
     input.type = 'search';
     input.name = 'wavlib_query_7f3c2a';
     input.id = 'wavlib-search-query';
-    input.placeholder = 'Search sounds by genre, mood, instrument, BPM, key...';
-    input.setAttribute('aria-label', 'Search sounds');
     input.setAttribute('autocomplete', 'new-password');
     input.setAttribute('autocorrect', 'off');
     input.setAttribute('autocapitalize', 'off');
@@ -98,10 +96,7 @@
     const links = { Terms: 'terms.html', Privacy: 'privacy.html', Disclaimer: 'disclaimer.html', Copyright: 'copyright.html' };
     legal.querySelectorAll('a').forEach((link) => {
       const label = link.textContent.trim();
-      if (links[label]) {
-        link.href = links[label];
-        link.removeAttribute('onclick');
-      }
+      if (links[label]) link.href = links[label];
     });
   }
 
@@ -124,12 +119,7 @@
     close.setAttribute('aria-label', 'Close navigation');
     close.appendChild(svgIcon('<path d="M6 6l12 12M18 6L6 18"/>'));
 
-    const scrim = document.createElement('div');
-    scrim.className = 'mobile-sidebar-scrim';
-    scrim.setAttribute('aria-hidden', 'true');
-
     sidebar.appendChild(close);
-    document.body.appendChild(scrim);
     document.body.appendChild(toggle);
 
     const media = window.matchMedia(`(max-width:${MOBILE_BREAKPOINT}px)`);
@@ -146,14 +136,13 @@
 
     toggle.addEventListener('click', () => setOpen(true));
     close.addEventListener('click', () => setOpen(false));
-    scrim.addEventListener('click', () => setOpen(false));
 
-    // Never cancel or replace WAVLIB's existing Search/Packs navigation.
+    // Do not intercept the existing inline onclick handlers. They call switchView()
+    // and are responsible for changing Home/Search/Packs. We only close the drawer.
     nav.addEventListener('click', (event) => {
       const item = event.target.closest('.nav-item');
-      if (!item) return;
-      if (isMobile()) window.setTimeout(() => setOpen(false), 220);
-    }, false);
+      if (item && isMobile()) window.setTimeout(() => setOpen(false), 250);
+    });
 
     document.addEventListener('keydown', (event) => {
       if (event.key === 'Escape' && document.body.classList.contains('mobile-sidebar-open')) setOpen(false);
@@ -167,38 +156,8 @@
     setOpen(false);
   }
 
-  function setupGlobalEmailRemoval() {
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const clean = () => {
-      document.querySelectorAll('input, textarea').forEach((input) => {
-        input.setAttribute('autocomplete', 'new-password');
-        input.setAttribute('autocorrect', 'off');
-        input.setAttribute('autocapitalize', 'off');
-        input.setAttribute('spellcheck', 'false');
-        input.setAttribute('data-form-type', 'other');
-        input.setAttribute('data-lpignore', 'true');
-        input.setAttribute('data-1p-ignore', 'true');
-        const value = String(input.value || '').trim();
-        if (emailPattern.test(value)) {
-          input.value = '';
-          input.removeAttribute('value');
-          input.dispatchEvent(new Event('input', { bubbles: true }));
-          input.dispatchEvent(new Event('change', { bubbles: true }));
-        }
-      });
-    };
-    clean();
-    document.addEventListener('input', clean, true);
-    document.addEventListener('change', clean, true);
-    document.addEventListener('focusin', clean, true);
-    window.addEventListener('pageshow', clean, { passive: true });
-    [0,100,250,500,1000,2000,4000,8000].forEach((n) => window.setTimeout(clean, n));
-    window.setInterval(clean, 300);
-  }
-
   function boot() {
     setupGlobalEmailAndAccountCleanup();
-    setupGlobalEmailRemoval();
     setupTopSearch();
     setupMobileSidebar();
     watchPackSampleSearch();
