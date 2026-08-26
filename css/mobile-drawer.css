@@ -30,16 +30,16 @@
   .mobile-menu-toggle svg,.mobile-sidebar-close svg{width:20px;height:20px;display:block}
   .mobile-menu-toggle:active,.mobile-sidebar-close:active{transform:scale(.94)}
 
+  /* Keep the drawer opener clean: no blur/frosted glass and no page-wide fog. */
   .mobile-sidebar-scrim{
     display:block;
     position:fixed;
     inset:0;
     z-index:2950;
-    background:rgba(0,0,0,.52);
-    opacity:0;
+    background:transparent!important;
+    opacity:0!important;
     visibility:hidden;
-    pointer-events:none;
-    transition:opacity .24s ease,visibility .24s ease;
+    pointer-events:none!important;
   }
 
   .sidebar{
@@ -48,13 +48,13 @@
     top:0!important;
     bottom:0!important;
     z-index:3000!important;
-    width:min(82vw,300px)!important;
-    max-width:300px!important;
+    width:min(78vw,280px)!important;
+    max-width:280px!important;
     height:100dvh!important;
     max-height:100dvh!important;
     min-height:100dvh!important;
     margin:0!important;
-    padding:max(18px,env(safe-area-inset-top)) 16px max(18px,env(safe-area-inset-bottom))!important;
+    padding:max(18px,env(safe-area-inset-top)) 14px max(18px,env(safe-area-inset-bottom))!important;
     display:flex!important;
     flex-direction:column!important;
     align-items:stretch!important;
@@ -68,10 +68,12 @@
     transform:translateX(-105%)!important;
     transition:transform .28s cubic-bezier(.22,.8,.22,1)!important;
     will-change:transform;
+    pointer-events:auto!important;
+    isolation:isolate;
   }
 
   body.mobile-sidebar-open .sidebar{transform:translateX(0)!important}
-  body.mobile-sidebar-open .mobile-sidebar-scrim{opacity:1;visibility:visible;pointer-events:auto}
+  body.mobile-sidebar-open .mobile-sidebar-scrim{opacity:0!important;visibility:hidden!important;pointer-events:none!important}
   body.mobile-sidebar-open .mobile-menu-toggle{opacity:0;pointer-events:none}
   body.mobile-sidebar-open{overflow:hidden!important}
 
@@ -110,10 +112,11 @@
     justify-content:center;
     border:1px solid rgba(255,255,255,.11);
     border-radius:12px;
-    background:rgba(255,255,255,.055);
+    background:#101010!important;
     color:#fff;
     cursor:pointer;
     touch-action:manipulation;
+    z-index:2;
   }
 
   .nav{
@@ -129,6 +132,7 @@
     overflow:visible!important;
     padding:0!important;
     margin:0!important;
+    pointer-events:auto!important;
   }
   .nav-item{
     flex:0 0 48px!important;
@@ -147,9 +151,15 @@
     font-size:14px!important;
     line-height:1!important;
     transform:none!important;
+    pointer-events:auto!important;
   }
   .nav-item svg{width:19px!important;height:19px!important;flex:0 0 19px!important}
+  .nav-item span{display:inline!important;visibility:visible!important;opacity:1!important}
   .nav-item.active{background:rgba(255,255,255,.085)!important;color:#fff!important}
+
+  /* Favourites is auth-only. ui.js adds .auth-visible after Supabase confirms a user. */
+  .favorites-nav{display:none!important}
+  .favorites-nav.auth-visible{display:flex!important}
 
   .signin-btn{
     flex:0 0 44px!important;
@@ -179,7 +189,7 @@
 }
 
 @media (max-width:380px){
-  .sidebar{width:min(88vw,290px)!important}
+  .sidebar{width:min(84vw,270px)!important}
   .brand-logo{width:122px!important;max-width:122px!important}
   .logo{height:78px!important;min-height:78px!important}
 }
