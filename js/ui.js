@@ -11,7 +11,7 @@
     svg.setAttribute('viewBox', '0 0 24 24');
     svg.setAttribute('fill', 'none');
     svg.setAttribute('stroke', 'currentColor');
-    svg.setAttribute('stroke-width', '2');
+    svg.setAttribute('stroke-width', '1.7');
     svg.setAttribute('stroke-linecap', 'round');
     svg.setAttribute('stroke-linejoin', 'round');
     svg.setAttribute('aria-hidden', 'true');
@@ -31,7 +31,7 @@
     toggle.type = 'button';
     toggle.setAttribute('aria-label', 'Open navigation');
     toggle.setAttribute('aria-expanded', 'false');
-    toggle.appendChild(svgIcon('<path d="M4 6h16M4 12h16M4 18h16"/>'));
+    toggle.appendChild(svgIcon('<rect x="4.5" y="5.5" width="15" height="13" rx="2"/><path d="M10 5.5v13"/>'));
 
     const close = document.createElement('button');
     close.className = 'mobile-sidebar-close';
