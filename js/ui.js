@@ -20,14 +20,42 @@
     const input = document.querySelector('.topbar .search-input');
     if (!input || input.dataset.wavlibSearchReady === '1') return;
 
-    // The topbar search must never contain the account email.
     input.dataset.wavlibSearchReady = '1';
-    input.value = '';
-    input.removeAttribute('value');
+    input.type = 'search';
+    input.name = 'wavlib-search-query';
+    input.id = 'wavlib-search-query';
     input.placeholder = 'Search sounds by genre, mood, instrument, BPM, key...';
     input.setAttribute('aria-label', 'Search sounds');
-    input.setAttribute('autocomplete', 'off');
-    input.setAttribute('name', 'search');
+    input.setAttribute('autocomplete', 'new-password');
+    input.setAttribute('autocorrect', 'off');
+    input.setAttribute('autocapitalize', 'off');
+    input.setAttribute('spellcheck', 'false');
+    input.setAttribute('data-form-type', 'other');
+    input.setAttribute('data-lpignore', 'true');
+    input.setAttribute('data-1p-ignore', 'true');
+
+    // Chrome/password managers can restore a saved email after DOMContentLoaded.
+    // Clear only email-like autofill values; real search text is never touched.
+    const clearAutofillEmail = () => {
+      if (/^\s*[^\s@]+@[^\s@]+\.[^\s@]+\s*$/.test(input.value)) {
+        input.value = '';
+      }
+    };
+
+    input.value = '';
+    input.removeAttribute('value');
+    clearAutofillEmail();
+
+    [0, 50, 150, 350, 700, 1200].forEach((delay) => {
+      window.setTimeout(clearAutofillEmail, delay);
+    });
+
+    input.addEventListener('focus', clearAutofillEmail);
+    input.addEventListener('input', () => {
+      // If a browser injects an email rather than the user's typed query, remove it.
+      clearAutofillEmail();
+    });
+    window.addEventListener('pageshow', clearAutofillEmail, { passive: true });
   }
 
   function setupMobileSidebar() {
