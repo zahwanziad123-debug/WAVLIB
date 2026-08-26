@@ -1,8 +1,8 @@
 /* WAVLIB mobile layout fix: no overlap, no horizontal escape, safe responsive sizing. */
 @media (max-width:768px){
 :root{--mg:12px;--nh:58px}
-html,body{width:100%;height:100%;min-width:0;max-width:100%;overflow:hidden!important;overscroll-behavior:none}
-*,*::before,*::after{box-sizing:border-box!important;min-width:0}
+html,body{width:100%;height:100%;min-width:0;max-width:100%;overflow:hidden!important;overscroll-behavior:none;-webkit-tap-highlight-color:transparent}
+*,*::before,*::after{box-sizing:border-box!important;min-width:0;-webkit-tap-highlight-color:transparent}
 img,svg,video,canvas,iframe{max-width:100%}
 .app{display:flex!important;flex-direction:column!important;width:100%!important;max-width:100vw!important;min-width:0!important;height:100dvh!important;max-height:100dvh!important;overflow:hidden!important}
 .sidebar{position:relative!important;inset:auto!important;z-index:100!important;display:flex!important;flex:0 0 var(--nh)!important;flex-direction:row!important;align-items:center!important;width:100%!important;max-width:100%!important;min-width:0!important;height:var(--nh)!important;min-height:var(--nh)!important;padding:7px var(--mg)!important;margin:0!important;overflow:hidden!important;border-right:0!important;border-bottom:1px solid var(--border)!important}
@@ -43,8 +43,13 @@ img,svg,video,canvas,iframe{max-width:100%}
 .track-time,.waveform{display:none!important}
 .filter-bar{display:flex!important;align-items:stretch!important;flex-wrap:wrap!important;width:100%!important;max-width:100%!important;min-width:0!important;gap:7px!important}
 .filter-bar .search-wrap{flex:1 1 100%!important;width:100%!important;max-width:none!important}
-.filter-btn{flex:0 0 auto!important;max-width:100%!important;min-height:36px!important;padding:8px 10px!important;font-size:11px!important}
-.filter-panel{position:fixed!important;left:10px!important;right:10px!important;top:auto!important;bottom:max(10px,env(safe-area-inset-bottom))!important;width:auto!important;max-width:none!important;max-height:70dvh!important;overflow-x:hidden!important;overflow-y:auto!important;z-index:1000!important}
+.filter-btn{position:relative!important;flex:0 0 auto!important;max-width:100%!important;min-height:36px!important;padding:8px 10px!important;font-size:11px!important}
+/* Mobile dropdowns stay attached to their trigger instead of being pushed off-screen. */
+.filter-btn .filter-panel,.filter-btn .dropdown-simple,.filter-bar .dropdown-simple,.filter-bar .filter-panel{position:absolute!important;top:calc(100% + 7px)!important;bottom:auto!important;left:0!important;right:auto!important;width:min(260px,calc(100vw - 18px))!important;max-width:calc(100vw - 18px)!important;max-height:min(60dvh,420px)!important;overflow-x:hidden!important;overflow-y:auto!important;z-index:2000!important;transform:none!important}
+.filter-panel{background:var(--bg-elevated)!important;border:1px solid var(--border)!important;border-radius:10px!important;box-shadow:0 12px 32px rgba(0,0,0,.55)!important}
+.filter-panel.open{display:block!important}
+/* If a dropdown is mounted directly under the filter bar, keep it within the viewport. */
+.filter-bar>.filter-panel,.filter-bar> .dropdown-simple{left:0!important;right:auto!important}
 .range-inputs{display:flex!important;width:100%!important;max-width:100%!important;gap:8px!important}
 .num-stepper{min-width:0!important;max-width:100%!important}
 .key-grid{grid-template-columns:repeat(7,minmax(0,1fr))!important;gap:4px!important}
@@ -61,6 +66,10 @@ img,svg,video,canvas,iframe{max-width:100%}
 .pack-action{max-width:100%!important;min-height:36px!important}
 [role=dialog],[aria-modal=true]{position:fixed!important;left:10px!important;right:10px!important;top:max(10px,env(safe-area-inset-top))!important;bottom:max(10px,env(safe-area-inset-bottom))!important;width:auto!important;max-width:none!important;max-height:none!important;overflow:auto!important;z-index:2000!important}
 .content *{max-inline-size:100%}
+/* Remove browser blue tap/selection appearance on mobile. */
+button,a,.filter-btn,.tag,.nav-item,.pack-card,input,select{outline:none!important;-webkit-tap-highlight-color:transparent!important}
+button:focus,a:focus,.filter-btn:focus,.tag:focus,.nav-item:focus,input:focus,select:focus{outline:none!important;box-shadow:none!important}
+::selection{background:#fff!important;color:#000!important}
 .pack-card:hover .pack-art,.play-overlay:hover,.track-play:hover{transform:none!important}
 }
 @media(max-width:420px){:root{--mg:9px}.logo{width:64px!important;max-width:64px!important;margin-right:4px!important}.brand-logo{width:60px!important;max-width:60px!important;height:36px!important}.nav{gap:2px!important}.nav-item{padding:7px!important;font-size:10px!important}.nav-item svg{width:13px!important;height:13px!important;flex-basis:13px!important}.signin-btn{min-width:57px!important;margin-left:3px!important;padding:7px!important;font-size:9.5px!important}.pack-grid{gap:8px!important}.pack-row{grid-auto-columns:minmax(124px,43vw)!important}}
