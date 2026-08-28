@@ -1,20 +1,38 @@
-/* WAVLIB mobile compatibility. Only layout-safe rules; content rendering stays controlled by the main app. */
+/* WAVLIB mobile content safety layer. Desktop is untouched. */
 @media (max-width:768px){
   html,body{overflow-x:hidden!important}
-  .content{min-width:0!important;max-width:100%!important}
-  .view{min-width:0!important;max-width:100%!important}
-  .view.active{min-width:0!important;max-width:100%!important}
-  .pack-card,.track-row,.pack-detail,.pack-detail-description,.pack-detail-tags,.pack-detail-meta{min-width:0!important;max-width:100%!important}
-  .pack-detail{overflow-wrap:anywhere}
-  .pack-detail-hero{width:100%!important;max-width:100%!important}
-  .pack-grid,.packs-grid,.samples-grid,.pack-list,.sample-list,.track-list,.pack-samples,.pack-samples-list{min-width:0!important;max-width:100%!important}
-  .pack-grid,.packs-grid,.samples-grid{grid-template-columns:minmax(0,1fr)!important}
-  .genre-pills,.chip-row,.packs-toolbar,.pack-samples-head,.pack-search-row,.pack-detail-actions{min-width:0!important;max-width:100%!important;flex-wrap:wrap!important}
-  .pack-action,.sort-select,.pack-search{max-width:100%!important}
+  .app{width:100%!important;min-width:0!important}
+  .main{width:100%!important;min-width:0!important;max-width:100%!important}
+  .content{display:block!important;width:100%!important;min-width:0!important;max-width:100%!important;overflow-x:hidden!important;overflow-y:auto!important;-webkit-overflow-scrolling:touch!important}
+
+  /* Never let the mobile compatibility layer hide application-rendered content. */
+  .view.active{display:block!important;visibility:visible!important;opacity:1!important;width:100%!important;min-width:0!important;max-width:100%!important}
+  .pack-row{display:grid!important;grid-auto-flow:column!important;grid-auto-columns:minmax(170px,186px)!important;width:100%!important;min-height:170px!important;overflow-x:auto!important;overflow-y:hidden!important}
+  .pack-grid,.packs-grid{display:grid!important;width:100%!important;min-height:120px!important;grid-template-columns:minmax(0,1fr)!important}
+  .track-list,.pack-samples,.pack-samples-list,.sample-list{display:flex!important;flex-direction:column!important;width:100%!important;min-height:48px!important}
+  .pack-card,.track-row{display:flex!important;visibility:visible!important;opacity:1!important;min-width:0!important;max-width:100%!important}
+  .pack-card{display:block!important}
+  .track-row{align-items:center!important}
+  .track-info{min-width:0!important;max-width:100%!important}
+  .pack-art,.pack-detail-hero{max-width:100%!important}
+  .pack-detail,.pack-detail-description,.pack-detail-tags,.pack-detail-meta{min-width:0!important;max-width:100%!important;overflow-wrap:anywhere!important}
+  .packs-toolbar,.genre-pills,.chip-row,.pack-samples-head,.pack-search-row,.pack-detail-actions{min-width:0!important;max-width:100%!important;flex-wrap:wrap!important}
+
+  /* Native/mobile dropdowns must remain tappable. */
+  select,.sort-select,.filter-select,.packs-sort,.filter-btn,.pack-mini-filter{pointer-events:auto!important;touch-action:manipulation!important}
+  .filter-panel,.pack-filter-panel,.dropdown,.select-menu{pointer-events:auto!important}
+
   .mobile-menu-toggle{top:max(8px,env(safe-area-inset-top))!important;left:max(10px,env(safe-area-inset-left))!important;right:auto!important}
-  .sidebar .mobile-sidebar-close{position:absolute!important;top:max(8px,env(safe-area-inset-top))!important;right:max(8px,env(safe-area-inset-right))!important;left:auto!important;width:40px!important;height:40px!important;min-width:40px!important;min-height:40px!important;margin:0!important;box-sizing:border-box!important;z-index:20!important}
-  .sidebar .legal{display:flex!important;width:100%!important;max-width:100%!important;flex-wrap:wrap!important;align-items:center!important;justify-content:flex-start!important;gap:10px 14px!important;margin-top:auto!important;margin-right:0!important;margin-left:0!important;padding-left:4px!important;padding-right:4px!important;padding-bottom:max(6px,env(safe-area-inset-bottom))!important;overflow:visible!important}
-  .sidebar .legal a{display:inline-block!important;flex:0 0 auto!important;font-size:11px!important;line-height:1.2!important;white-space:nowrap!important}
-  select,.sort-select,.filter-select,.packs-sort{pointer-events:auto!important;touch-action:manipulation!important;position:relative!important;z-index:50!important}
-  .filter-panel,.dropdown,.select-menu{pointer-events:auto!important}
+  .sidebar .mobile-sidebar-close{position:absolute!important;top:max(8px,env(safe-area-inset-top))!important;right:max(8px,env(safe-area-inset-right))!important;left:auto!important;width:40px!important;height:40px!important;min-width:40px!important;min-height:40px!important;z-index:20!important}
+  .sidebar .legal{display:flex!important;width:100%!important;max-width:100%!important;flex-wrap:wrap!important;align-items:center!important;justify-content:flex-start!important;gap:10px 14px!important;margin-top:auto!important;padding:18px 4px max(6px,env(safe-area-inset-bottom))!important;overflow:visible!important}
+  .sidebar .legal a{display:inline-block!important;flex:0 0 auto!important;font-size:11px!important;white-space:nowrap!important;pointer-events:auto!important}
+  .nav,.nav-item{pointer-events:auto!important;touch-action:manipulation!important}
 }
+@media (max-width:380px){
+  .sidebar{width:min(84vw,270px)!important}
+  .brand-logo{width:122px!important;max-width:122px!important}
+  .logo{height:78px!important;min-height:78px!important}
+  .mobile-menu-toggle{left:10px!important;width:40px!important;height:40px!important}
+  .mobile-sidebar-close{right:10px!important;width:38px!important;height:38px!important}
+}
+@media (prefers-reduced-motion:reduce){.sidebar,.mobile-menu-toggle,.mobile-sidebar-close{transition:none!important}}
