@@ -7,6 +7,11 @@ import './mobile-layout-fix.css';
 export const metadata: Metadata = {
   title: 'WAVLIB',
   description: 'WAVLIB sample library',
+  icons: {
+    icon: '/favicon.svg',
+    shortcut: '/favicon.svg',
+    apple: '/favicon.svg',
+  },
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
