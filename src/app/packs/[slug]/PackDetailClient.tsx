@@ -2,11 +2,12 @@
 
 import { useMemo, useState } from 'react';
 import { ArrowLeft, ChevronDown, Download, Heart, Home, Menu, Package, Play, Search, Share2, X, AlertTriangle } from 'lucide-react';
-import { useRouter } from 'next/navigation';
 import styles from './page.module.css';
 
 type Pack = { name: string; code: string; art: string; tags: string[] };
 type PackSample = { name: string; type: string; tags: string[]; bpm: number; key: string; time: string; variant: number };
+
+const BASE_PATH = '/WAVLIB';
 
 const packs: Pack[] = [
   { name: 'Cobalt Garage Essentials Vol.2', code: 'CG', art: 'cobalt', tags: ['Garage', 'House', 'Drums'] },
@@ -60,7 +61,6 @@ function Filter({ label, open, onClick, children }: { label: string; open: boole
 }
 
 export default function PackDetailClient({ slug }: { slug: string }) {
-  const router = useRouter();
   const [menu, setMenu] = useState(false);
   const [query, setQuery] = useState('');
   const [openFilter, setOpenFilter] = useState<'bpm' | 'key' | 'type' | 'tags' | null>(null);
@@ -92,9 +92,9 @@ export default function PackDetailClient({ slug }: { slug: string }) {
       <div className="brand"><div className="brand-mark">W</div><div><strong>WAVLIB</strong><small>SOUND LIBRARY</small></div></div>
       <button className="close" onClick={() => setMenu(false)} aria-label="Close menu"><X size={18} /></button>
       <nav>
-        <a className="nav" href="/"><Home size={20} /><span>Home</span></a>
-        <a className="nav" href="/#search"><Search size={20} /><span>Search</span></a>
-        <a className="nav active" href="/"><Package size={20} /><span>Packs</span></a>
+        <a className="nav" href={`${BASE_PATH}/`}><Home size={20} /><span>Home</span></a>
+        <a className="nav" href={`${BASE_PATH}/#search`}><Search size={20} /><span>Search</span></a>
+        <a className="nav active" href={`${BASE_PATH}/#packs`}><Package size={20} /><span>Packs</span></a>
       </nav>
       <div className="legal"><span>Terms</span><span>Privacy</span><span>Disclaimer</span><span>Copyright © WAVLIB</span></div>
     </aside>
@@ -108,7 +108,7 @@ export default function PackDetailClient({ slug }: { slug: string }) {
       </header>
 
       <div className={styles.page}>
-        <div className={styles.crumbs}><button onClick={() => router.back()}><ArrowLeft size={15} /> Back to packs</button><span>/</span><span>{pack.name}</span></div>
+        <div className={styles.crumbs}><button onClick={() => { window.location.href = `${BASE_PATH}/#packs`; }}><ArrowLeft size={15} /> Back to packs</button><span>/</span><span>{pack.name}</span></div>
 
         <section className={styles.packHeader}>
           <div className={`${styles.packCover} ${styles[`art-${pack.art}`]}`}><span>{pack.code}</span><div /></div>
