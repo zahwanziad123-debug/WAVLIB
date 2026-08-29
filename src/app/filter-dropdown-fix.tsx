@@ -14,8 +14,10 @@ export default function FilterDropdownFix() {
       const target = event.target as HTMLElement | null;
       const button = target?.closest('.filter-button') as HTMLButtonElement | null;
       if (!button) return;
-      const label = button.childNodes[0]?.textContent?.trim() || '';
+
+      const label = button.dataset.filterLabel || button.childNodes[0]?.textContent?.trim() || '';
       if (!(label in OPTIONS)) return;
+      button.dataset.filterLabel = label;
 
       event.preventDefault();
       event.stopPropagation();
@@ -48,7 +50,8 @@ export default function FilterDropdownFix() {
         item.addEventListener('click', (clickEvent) => {
           clickEvent.preventDefault();
           clickEvent.stopPropagation();
-          button.childNodes[0].textContent = option;
+          const textNode = button.childNodes[0];
+          if (textNode) textNode.textContent = option;
           button.classList.add('active');
           menu.remove();
         });
