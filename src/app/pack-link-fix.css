@@ -14,3 +14,34 @@
   color: #eee;
   text-decoration: none !important;
 }
+
+/* Navigation links must never inherit the browser's default underline. */
+a.nav,
+a.nav:visited,
+a.nav:hover,
+a.nav:active,
+a.nav:focus {
+  color: inherit;
+  text-decoration: none !important;
+}
+
+/* Remove decorative page separators; cards keep their own intentional outlines. */
+.topbar,
+.sidebar {
+  border-bottom: 0 !important;
+  border-right: 0 !important;
+}
+
+/* Pack-detail CSS-module classes contain these stable source-name fragments. */
+[class*="packHeader"] {
+  border-bottom: 0 !important;
+}
+
+[class*="sampleList"] {
+  border-top: 0 !important;
+  border-bottom: 0 !important;
+}
+
+[class*="sample"] {
+  border-bottom: 0 !important;
+}
