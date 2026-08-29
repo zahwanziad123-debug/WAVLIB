@@ -3,6 +3,7 @@ import './globals.css';
 import './premium.css';
 import './ui-fixes.css';
 import './mobile-layout-fix.css';
+import CopyProtection from './copy-protection';
 
 export const metadata: Metadata = {
   title: 'WAVLIB',
@@ -17,7 +18,10 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <CopyProtection />
+        {children}
+      </body>
     </html>
   );
 }
