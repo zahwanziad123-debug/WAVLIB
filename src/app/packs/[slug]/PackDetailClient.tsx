@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react';
 import { ArrowLeft, ChevronDown, Download, Heart, Home, Menu, Package, Play, Search, Share2, X } from 'lucide-react';
 import styles from './page.module.css';
+import mobileFixes from './mobile-fixes.module.css';
 
 type Pack = { name: string; code: string; art: string; tags: string[] };
 type PackSample = { name: string; type: string; tags: string[]; bpm: number; key: string; time: string; variant: number };
@@ -53,11 +54,11 @@ function slugify(value: string) {
 
 function Waveform({ variant }: { variant: number }) {
   const heights = Array.from({ length: 42 }, (_, i) => 6 + ((i * 17 + variant * 13) % 25));
-  return <div className={styles.waveform} aria-hidden="true">{heights.map((height, i) => <i key={i} style={{ height }} />)}</div>;
+  return <div className={styles.waveform} data-pack-waveform aria-hidden="true">{heights.map((height, i) => <i key={i} style={{ height }} />)}</div>;
 }
 
 function Filter({ label, open, onClick, children }: { label: string; open: boolean; onClick: () => void; children?: React.ReactNode }) {
-  return <div className={styles.filterWrap}><button className={`${styles.filterButton} ${open ? styles.filterActive : ''}`} onClick={onClick}>{label}<ChevronDown size={14} /></button>{open && children}</div>;
+  return <div className={styles.filterWrap} data-filter-wrap><button className={`${styles.filterButton} ${open ? styles.filterActive : ''}`} onClick={onClick}>{label}<ChevronDown size={14} /></button>{open && children}</div>;
 }
 
 export default function PackDetailClient({ slug }: { slug: string }) {
@@ -86,7 +87,7 @@ export default function PackDetailClient({ slug }: { slug: string }) {
     else await navigator.clipboard?.writeText(url);
   };
 
-  return <main className="site">
+  return <main className={`site ${mobileFixes.root}`}>
     <div className="ambient ambient-one" /><div className="ambient ambient-two" />
     <aside className={`sidebar ${menu ? 'open' : ''}`}>
       <div className="brand"><div className="brand-mark">W</div><div><strong>WAVLIB</strong><small>SOUND LIBRARY</small></div></div>
@@ -123,25 +124,25 @@ export default function PackDetailClient({ slug }: { slug: string }) {
         </section>
 
         <section className={styles.browser}>
-          <div className={styles.searchRow}><div className={styles.localSearch}><Search size={17} /><input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search this pack..." /><span>{filtered.length} / {packSamples.length}</span></div>
-            <div className={styles.filters}>
-              <Filter label="BPM" open={openFilter === 'bpm'} onClick={() => toggle('bpm')}><div className={styles.popover}><div className={styles.rangeHead}><strong>From</strong><strong>To</strong></div><div className={styles.rangeValues}><span>60</span><span>200</span></div><div className={styles.rangeLine}><i /><i /></div><button onClick={() => setOpenFilter(null)}>Apply</button></div></Filter>
-              <Filter label="Key" open={openFilter === 'key'} onClick={() => toggle('key')}><div className={styles.popover}><div className={styles.mode}><button>Major</button><button>Minor</button></div><div className={styles.piano}>{['C','D','E','F','G','A','B'].map((key) => <span key={key}>{key}</span>)}</div></div></Filter>
-              <Filter label={`Type: ${type}`} open={openFilter === 'type'} onClick={() => toggle('type')}><div className={`${styles.popover} ${styles.typePopover}`}>{['All', 'Loop', 'One-shot'].map((item) => <button key={item} onClick={() => { setType(item); setOpenFilter(null); }}>{item}</button>)}</div></Filter>
-              <Filter label="Tags" open={openFilter === 'tags'} onClick={() => toggle('tags')}><div className={`${styles.popover} ${styles.tagsPopover}`}><button onClick={() => { setTag('All'); setOpenFilter(null); }}>All</button>{allTags.map((item) => <button key={item} onClick={() => { setTag(item); setOpenFilter(null); }}>{item}</button>)}</div></Filter>
+          <div className={styles.searchRow}><div className={styles.localSearch} data-pack-search><Search size={17} /><input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search this pack..." /><span>{filtered.length} / {packSamples.length}</span></div>
+            <div className={styles.filters} data-pack-filters>
+              <Filter label="BPM" open={openFilter === 'bpm'} onClick={() => toggle('bpm')}><div className={styles.popover} data-filter-popover><div className={styles.rangeHead}><strong>From</strong><strong>To</strong></div><div className={styles.rangeValues}><span>60</span><span>200</span></div><div className={styles.rangeLine}><i /><i /></div><button onClick={() => setOpenFilter(null)}>Apply</button></div></Filter>
+              <Filter label="Key" open={openFilter === 'key'} onClick={() => toggle('key')}><div className={styles.popover} data-filter-popover><div className={styles.mode}><button>Major</button><button>Minor</button></div><div className={styles.piano}>{['C','D','E','F','G','A','B'].map((key) => <span key={key}>{key}</span>)}</div></div></Filter>
+              <Filter label={`Type: ${type}`} open={openFilter === 'type'} onClick={() => toggle('type')}><div className={`${styles.popover} ${styles.typePopover}`} data-filter-popover>{['All', 'Loop', 'One-shot'].map((item) => <button key={item} onClick={() => { setType(item); setOpenFilter(null); }}>{item}</button>)}</div></Filter>
+              <Filter label="Tags" open={openFilter === 'tags'} onClick={() => toggle('tags')}><div className={`${styles.popover} ${styles.tagsPopover}`} data-filter-popover><button onClick={() => { setTag('All'); setOpenFilter(null); }}>All</button>{allTags.map((item) => <button key={item} onClick={() => { setTag(item); setOpenFilter(null); }}>{item}</button>)}</div></Filter>
             </div>
           </div>
-          <div className={styles.tagStrip}>{allTags.slice(0, 16).map((item) => <button className={tag === item ? styles.tagSelected : ''} key={item} onClick={() => setTag(tag === item ? 'All' : item)}>{item}</button>)}</div>
+          <div className={styles.tagStrip} data-pack-tags>{allTags.slice(0, 16).map((item) => <button className={tag === item ? styles.tagSelected : ''} key={item} onClick={() => setTag(tag === item ? 'All' : item)}>{item}</button>)}</div>
         </section>
 
-        <section className={styles.sampleList}>
-          {filtered.map((sample) => <article className={styles.sample} key={sample.name}>
+        <section className={styles.sampleList} data-pack-sample-list>
+          {filtered.map((sample) => <article className={styles.sample} data-pack-sample key={sample.name}>
             <button className={styles.play} aria-label={`Play ${sample.name}`}><Play size={15} fill="currentColor" strokeWidth={0} /></button>
-            <div className={styles.sampleInfo}><strong>{sample.name}</strong><small>{pack.name}</small><div className={styles.sampleTags}>{sample.tags.slice(0, 4).map((item) => <span key={item}>{item}</span>)}</div></div>
+            <div className={styles.sampleInfo} data-pack-sample-info><strong>{sample.name}</strong><small>{pack.name}</small><div className={styles.sampleTags} data-pack-sample-tags>{sample.tags.slice(0, 4).map((item) => <span key={item}>{item}</span>)}</div></div>
             <Waveform variant={sample.variant} />
-            <span className={styles.time}>{sample.time}</span><span className={styles.meta}>{sample.key}</span><span className={styles.meta}>{sample.bpm}</span>
-            <button className={`${styles.iconButton} ${liked[sample.name] ? styles.liked : ''}`} onClick={() => setLiked((current) => ({ ...current, [sample.name]: !current[sample.name] }))} aria-label="Favourite"><Heart size={17} /></button>
-            <button className={styles.iconButton} aria-label="Download"><Download size={17} /></button>
+            <span className={styles.time} data-pack-time>{sample.time}</span><span className={styles.meta}>{sample.key}</span><span className={styles.meta}>{sample.bpm}</span>
+            <button className={`${styles.iconButton} ${liked[sample.name] ? styles.liked : ''}`} data-pack-favourite onClick={() => setLiked((current) => ({ ...current, [sample.name]: !current[sample.name] }))} aria-label="Favourite"><Heart size={17} /></button>
+            <button className={styles.iconButton} data-pack-download aria-label="Download"><Download size={17} /></button>
           </article>)}
           {filtered.length === 0 && <div className={styles.empty}>No samples match these filters.</div>}
         </section>
