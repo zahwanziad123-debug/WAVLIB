@@ -1,0 +1,40 @@
+/* WAVLIB deep responsive pass: mobile-only layout corrections + safe dropdown surfaces. */
+@media (max-width: 700px) {
+  html, body { width:100%; max-width:100%; overflow-x:hidden !important; }
+  .site { width:100% !important; max-width:100vw !important; min-width:0 !important; overflow-x:hidden !important; }
+  .content { width:100% !important; max-width:100vw !important; min-width:0 !important; padding-left:0 !important; overflow-x:hidden !important; }
+  .sidebar { width:min(84vw,320px) !important; max-width:84vw !important; left:0 !important; right:auto !important; }
+  .sidebar.open { transform:translateX(0) !important; }
+  .sidebar .legal { margin-top:auto !important; padding-bottom:8px; }
+  .sample-list .sample, .search-results .sample {
+    width:100% !important; max-width:100% !important; min-width:0 !important;
+    display:grid !important;
+    grid-template-columns:34px minmax(0,1fr) 28px 30px 30px 30px !important;
+    grid-template-rows:auto auto !important; column-gap:7px !important; row-gap:3px !important;
+    min-height:84px !important; padding:9px 8px !important; align-items:center !important; overflow:hidden !important;
+  }
+  .sample-list .sample-play, .search-results .sample-play { grid-column:1 !important; grid-row:1 / span 2 !important; width:32px !important; height:32px !important; align-self:center !important; }
+  .sample-list .sample-main, .search-results .sample-main { grid-column:2 !important; grid-row:1 !important; min-width:0 !important; overflow:hidden !important; align-self:end !important; }
+  .sample-list .sample-main strong, .search-results .sample-main strong { display:block !important; max-width:100% !important; font-size:10px !important; line-height:1.2 !important; white-space:nowrap !important; overflow:hidden !important; text-overflow:ellipsis !important; }
+  .sample-list .sample-tags, .search-results .sample-tags { display:flex !important; flex-wrap:nowrap !important; max-width:100% !important; overflow:hidden !important; gap:4px !important; margin-top:4px !important; }
+  .sample-list .sample-tags span, .search-results .sample-tags span { flex:0 0 auto !important; font-size:7px !important; line-height:1 !important; padding:4px 6px !important; white-space:nowrap !important; }
+  .sample-list .waveform, .search-results .waveform { grid-column:2 !important; grid-row:2 !important; width:100% !important; max-width:100% !important; min-width:0 !important; height:25px !important; margin:0 !important; overflow:hidden !important; align-self:start !important; }
+  .sample-list .waveform i, .search-results .waveform i { width:2px !important; min-width:2px !important; flex:0 0 2px !important; border-radius:3px !important; opacity:.82 !important; }
+  .sample-list .sample-duration, .search-results .sample-duration { grid-column:3 !important; grid-row:1 !important; align-self:start !important; text-align:right !important; font-size:8px !important; white-space:nowrap !important; }
+  .sample-list .sample-icon, .search-results .sample-icon { display:grid !important; width:30px !important; height:30px !important; grid-row:1 !important; align-self:start !important; color:#858585 !important; z-index:2 !important; }
+  .sample-list .sample-icon:nth-last-child(3), .search-results .sample-icon:nth-last-child(3) { grid-column:4 !important; }
+  .sample-list .sample-icon:nth-last-child(2), .search-results .sample-icon:nth-last-child(2) { grid-column:5 !important; }
+  .sample-list .sample-icon:nth-last-child(1), .search-results .sample-icon:nth-last-child(1) { grid-column:6 !important; }
+  .sample-list .sample-icon svg, .search-results .sample-icon svg { width:17px !important; height:17px !important; }
+  .search-panel { overflow:visible !important; }
+  .filters { overflow-x:auto !important; overflow-y:visible !important; }
+  .filter-wrap { position:relative; flex:0 0 auto; }
+  .filters > .filter-wrap { overflow:visible !important; }
+  .filters .filter-button { height:38px !important; border-radius:12px !important; }
+  .dropdown.generic-filter-menu, .search-panel .dropdown { position:fixed !important; left:12px !important; right:12px !important; top:auto !important; bottom:12px !important; width:auto !important; max-width:none !important; max-height:72vh !important; overflow:auto !important; z-index:200 !important; }
+}
+@media (min-width:701px) { .dropdown.generic-filter-menu { z-index:200; } }
+.generic-filter-menu { padding:8px !important; min-width:190px; }
+.generic-filter-menu button { width:100% !important; min-height:34px !important; padding:0 10px !important; border:0 !important; border-radius:8px !important; background:transparent !important; color:#b8b8b8 !important; display:flex !important; align-items:center !important; justify-content:flex-start !important; text-align:left !important; cursor:pointer !important; }
+.generic-filter-menu button:hover, .generic-filter-menu button.selected { background:#292929 !important; color:#fff !important; }
+.generic-filter-menu .menu-title { padding:7px 10px 6px; color:#777; font-size:9px; letter-spacing:.12em; text-transform:uppercase; }
