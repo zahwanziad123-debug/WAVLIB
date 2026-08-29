@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { ArrowLeft, ChevronDown, Download, Heart, Home, Menu, Package, Play, Search, Share2, X } from 'lucide-react';
+import { ArrowLeft, ChevronDown, Download, Heart, Home, Menu, Package, Play, Search, Share2, X, AlertTriangle } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
 import styles from './page.module.css';
 
@@ -117,8 +117,10 @@ export default function PackDetailPage() {
             <div className={styles.eyebrow}>SAMPLE PACK</div>
             <h1>{pack.name}</h1>
             <div className={styles.packTags}>{pack.tags.map((item) => <span key={item}>{item}</span>)}</div>
+            <div className={styles.creator}>WAVLIB Sound Library</div>
             <p>Production-ready sounds from this WAVLIB collection. Browse, preview and organize the individual samples inside the pack.</p>
-            <div className={styles.actions}><button onClick={share}><Share2 size={16} /> Share</button><button><Download size={16} /> Download the entire pack</button></div>
+            <div className={styles.actions}><button onClick={share}><Share2 size={15} /> Share</button><button><Download size={15} /> Download the entire pack</button></div>
+            <button className={styles.report}><AlertTriangle size={12} /> Report copyright infringement</button>
           </div>
         </section>
 
