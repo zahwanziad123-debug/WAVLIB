@@ -2,43 +2,46 @@
 
 import { useEffect } from 'react';
 
+const BASE_PATH = '/WAVLIB';
+
 /**
- * Keeps the URL in sync with the client-side navigation without causing a
- * hashchange event. The page component owns the actual view state.
- *
- * The previous implementation wrote window.location.hash on every sidebar
- * click. That fired the page's hashchange listener while React was already
- * changing the view, which could leave the URL at #search/#packs while the
- * rendered view had fallen back to Home.
+ * Keeps the client-side navigation URL inside the GitHub Pages project path.
+ * Never derive the route from window.location.pathname because an earlier
+ * navigation can already have landed at the domain root.
  */
 export default function PackCardNavigation() {
   useEffect(() => {
     const onClick = (event: MouseEvent) => {
       const target = event.target as HTMLElement | null;
-
       const navButton = target?.closest<HTMLButtonElement>('.sidebar .nav');
+
       if (navButton) {
         const label = navButton.textContent?.trim().toLowerCase() || '';
         const hash = label.includes('search')
-          ? '#search'
+          ? 'search'
           : label.includes('packs')
-            ? '#packs'
-            : '';
+            ? 'packs'
+            : 'home';
 
-        // React's nav() updates the view. Only update the address bar here;
-        // replaceState deliberately does not emit hashchange, so it cannot
-        // race the view state back to Home.
-        const nextUrl = `${window.location.pathname}${window.location.search}${hash}`;
-        if (`${window.location.pathname}${window.location.search}${window.location.hash}` !== nextUrl) {
-          window.history.replaceState(null, '', nextUrl);
+        event.preventDefault();
+        const nextUrl = `${BASE_PATH}/#${hash}`;
+        const currentUrl = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+
+        if (currentUrl !== nextUrl) {
+          window.history.pushState(null, '', nextUrl);
         }
+
+        // The page component owns the rendered view. Dispatch a popstate
+        // event so it can synchronize immediately without a full reload.
+        window.dispatchEvent(new PopStateEvent('popstate'));
         return;
       }
 
       const backButton = target?.closest<HTMLButtonElement>('.crumbs button');
       if (backButton) {
         event.preventDefault();
-        window.history.replaceState(null, '', `${window.location.pathname}${window.location.search}#packs`);
+        window.history.pushState(null, '', `${BASE_PATH}/#packs`);
+        window.dispatchEvent(new PopStateEvent('popstate'));
       }
     };
 
