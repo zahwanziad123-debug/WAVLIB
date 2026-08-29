@@ -1,0 +1,16 @@
+.pack-card,
+.pack-card:visited,
+.pack-card:hover,
+.pack-card:active,
+.pack-card:focus {
+  display: block;
+  color: inherit;
+  text-decoration: none !important;
+}
+
+.pack-card .pack-info h3,
+.pack-card .pack-info h3:visited,
+.pack-card .pack-info h3:hover {
+  color: #eee;
+  text-decoration: none !important;
+}
