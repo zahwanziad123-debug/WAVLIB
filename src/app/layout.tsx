@@ -8,6 +8,7 @@ import './tap-highlight-fix.css';
 import './deep-mobile-fix.css';
 import './pack-detail-mobile-fix.css';
 import './final-ui-fix.css';
+import './upload/upload.css';
 import CopyProtection from './copy-protection';
 import PackCardNavigation from './pack-card-navigation';
 import FilterDropdownFix from './filter-dropdown-fix';
@@ -15,22 +16,9 @@ import FilterDropdownFix from './filter-dropdown-fix';
 export const metadata: Metadata = {
   title: 'WAVLIB',
   description: 'WAVLIB sample library',
-  icons: {
-    icon: '/WAVLIB/favicon.svg',
-    shortcut: '/WAVLIB/favicon.svg',
-    apple: '/WAVLIB/favicon.svg',
-  },
+  icons: { icon: '/WAVLIB/favicon.svg', shortcut: '/WAVLIB/favicon.svg', apple: '/WAVLIB/favicon.svg' },
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return (
-    <html lang="en">
-      <body>
-        <CopyProtection />
-        <PackCardNavigation />
-        <FilterDropdownFix />
-        {children}
-      </body>
-    </html>
-  );
+  return <html lang="en"><body><CopyProtection /><PackCardNavigation /><FilterDropdownFix />{children}</body></html>;
 }
