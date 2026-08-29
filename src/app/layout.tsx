@@ -4,6 +4,7 @@ import './premium.css';
 import './ui-fixes.css';
 import './mobile-layout-fix.css';
 import CopyProtection from './copy-protection';
+import PackCardNavigation from './pack-card-navigation';
 
 export const metadata: Metadata = {
   title: 'WAVLIB',
@@ -20,6 +21,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html lang="en">
       <body>
         <CopyProtection />
+        <PackCardNavigation />
         {children}
       </body>
     </html>
