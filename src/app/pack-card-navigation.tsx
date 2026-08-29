@@ -17,6 +17,8 @@ export default function PackCardNavigation() {
       window.location.assign(`${BASE_PATH}/packs/${slugify(name)}/`);
     };
 
+    const navigate = (path: string) => window.location.assign(`${BASE_PATH}${path}`);
+
     const onClick = (event: MouseEvent) => {
       const target = event.target as HTMLElement | null;
       const card = target?.closest<HTMLElement>('.pack-card');
@@ -26,19 +28,20 @@ export default function PackCardNavigation() {
         return;
       }
 
-      const link = target?.closest<HTMLAnchorElement>('a.nav');
-      if (link) {
-        const label = link.textContent?.trim().toLowerCase() || '';
-        if (label.includes('home')) {
-          event.preventDefault();
-          window.location.assign(`${BASE_PATH}/`);
-        } else if (label.includes('search')) {
-          event.preventDefault();
-          window.location.assign(`${BASE_PATH}/#search`);
-        } else if (label.includes('packs')) {
-          event.preventDefault();
-          window.location.assign(`${BASE_PATH}/#packs`);
-        }
+      const navLink = target?.closest<HTMLAnchorElement>('a.nav');
+      if (navLink) {
+        const label = navLink.textContent?.trim().toLowerCase() || '';
+        event.preventDefault();
+        if (label.includes('home')) navigate('/');
+        else if (label.includes('search')) navigate('/#search');
+        else if (label.includes('packs')) navigate('/#packs');
+        return;
+      }
+
+      const backButton = target?.closest<HTMLButtonElement>('.crumbs button');
+      if (backButton) {
+        event.preventDefault();
+        navigate('/#packs');
       }
     };
 
