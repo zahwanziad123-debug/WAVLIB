@@ -6,13 +6,15 @@ function slugify(value: string) {
   return value.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 }
 
+const BASE_PATH = '/WAVLIB';
+
 export default function PackCardNavigation() {
   useEffect(() => {
     const cards = Array.from(document.querySelectorAll<HTMLElement>('.pack-card'));
     const go = (card: HTMLElement) => {
       const name = card.querySelector('h3')?.textContent?.trim();
       if (!name) return;
-      window.location.assign(`/packs/${slugify(name)}`);
+      window.location.assign(`${BASE_PATH}/packs/${slugify(name)}/`);
     };
 
     const onClick = (event: MouseEvent) => {
@@ -41,7 +43,7 @@ export default function PackCardNavigation() {
       document.removeEventListener('click', onClick);
       document.removeEventListener('keydown', onKeyDown);
     };
-  });
+  }, []);
 
   return null;
 }
