@@ -1,0 +1,75 @@
+/* Pack detail fixes. Uses stable semantic fragments from CSS-module class names. */
+[class*="report"] { display:none !important; }
+
+@media (max-width:700px) {
+  article[class*="sample"] {
+    grid-template-columns:32px minmax(0,1fr) 32px 30px 30px !important;
+    grid-template-rows:auto auto !important;
+    gap:4px 7px !important;
+    min-height:88px !important;
+    padding:9px 2px !important;
+    align-items:center !important;
+  }
+  article[class*="sample"] > button[class*="play"] {
+    grid-column:1 !important;
+    grid-row:1 / span 2 !important;
+    width:31px !important;
+    height:31px !important;
+  }
+  article[class*="sample"] [class*="sampleInfo"] {
+    grid-column:2 !important;
+    grid-row:1 !important;
+    min-width:0 !important;
+    overflow:hidden !important;
+  }
+  article[class*="sample"] [class*="sampleInfo"] strong {
+    font-size:10px !important;
+    white-space:nowrap !important;
+    overflow:hidden !important;
+    text-overflow:ellipsis !important;
+  }
+  article[class*="sample"] [class*="sampleTags"] {
+    display:flex !important;
+    flex-wrap:nowrap !important;
+    overflow:hidden !important;
+    gap:4px !important;
+    margin-top:5px !important;
+  }
+  article[class*="sample"] [class*="sampleTags"] span {
+    font-size:7px !important;
+    padding:3px 6px !important;
+    white-space:nowrap !important;
+    flex:0 0 auto !important;
+  }
+  article[class*="sample"] [class*="waveform"] {
+    grid-column:2 !important;
+    grid-row:2 !important;
+    width:100% !important;
+    height:25px !important;
+    overflow:hidden !important;
+  }
+  article[class*="sample"] [class*="waveform"] i {
+    width:2px !important;
+    min-width:2px !important;
+    flex:0 0 2px !important;
+  }
+  article[class*="sample"] [class*="time"] {
+    grid-column:3 !important;
+    grid-row:1 !important;
+    align-self:start !important;
+    font-size:8px !important;
+    text-align:right !important;
+  }
+  article[class*="sample"] [class*="meta"] { display:none !important; }
+  article[class*="sample"] button[class*="iconButton"] {
+    display:grid !important;
+    width:30px !important;
+    height:30px !important;
+    padding:0 !important;
+    align-self:start !important;
+    z-index:3 !important;
+  }
+  article[class*="sample"] button[class*="iconButton"]:nth-last-child(2) { grid-column:4 !important; grid-row:1 !important; }
+  article[class*="sample"] button[class*="iconButton"]:nth-last-child(1) { grid-column:5 !important; grid-row:1 !important; }
+  article[class*="sample"] button[class*="iconButton"] svg { width:17px !important; height:17px !important; }
+}
