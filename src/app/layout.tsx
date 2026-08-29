@@ -4,6 +4,7 @@ import './premium.css';
 import './ui-fixes.css';
 import './mobile-layout-fix.css';
 import './pack-link-fix.css';
+import './tap-highlight-fix.css';
 import CopyProtection from './copy-protection';
 import PackCardNavigation from './pack-card-navigation';
 
