@@ -8,9 +8,9 @@ export const metadata: Metadata = {
   title: 'WAVLIB',
   description: 'WAVLIB sample library',
   icons: {
-    icon: '/favicon.svg',
-    shortcut: '/favicon.svg',
-    apple: '/favicon.svg',
+    icon: '/WAVLIB/favicon.svg',
+    shortcut: '/WAVLIB/favicon.svg',
+    apple: '/WAVLIB/favicon.svg',
   },
 };
 
