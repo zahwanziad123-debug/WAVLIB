@@ -6,7 +6,6 @@ export default function CopyProtection() {
   useEffect(() => {
     const stop = (event: Event) => event.preventDefault();
 
-    // Remove any selection that may already exist when the page hydrates.
     const clearSelection = () => {
       const selection = window.getSelection();
       if (selection && !selection.isCollapsed) selection.removeAllRanges();
@@ -23,6 +22,26 @@ export default function CopyProtection() {
       }
     };
 
+    const legalRoutes: Record<string, string> = {
+      Terms: '/WAVLIB/terms/',
+      Privacy: '/WAVLIB/privacy/',
+      Disclaimer: '/WAVLIB/disclaimer/',
+    };
+
+    const onLegalClick = (event: MouseEvent) => {
+      const target = event.target as HTMLElement | null;
+      const item = target?.closest('.legal span') as HTMLElement | null;
+      if (!item) return;
+      const label = item.textContent?.trim() || '';
+      if (legalRoutes[label]) {
+        event.preventDefault();
+        window.location.assign(legalRoutes[label]);
+      } else if (label.startsWith('Copyright')) {
+        event.preventDefault();
+        window.location.assign('/WAVLIB/copyright/');
+      }
+    };
+
     document.addEventListener('contextmenu', stop);
     document.addEventListener('selectstart', stop);
     document.addEventListener('dragstart', stop);
@@ -31,6 +50,7 @@ export default function CopyProtection() {
     document.addEventListener('keydown', onKeyDown);
     document.addEventListener('mouseup', clearSelection);
     document.addEventListener('touchend', clearSelection);
+    document.addEventListener('click', onLegalClick);
 
     clearSelection();
 
@@ -43,6 +63,7 @@ export default function CopyProtection() {
       document.removeEventListener('keydown', onKeyDown);
       document.removeEventListener('mouseup', clearSelection);
       document.removeEventListener('touchend', clearSelection);
+      document.removeEventListener('click', onLegalClick);
     };
   }, []);
 
