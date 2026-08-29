@@ -5,12 +5,20 @@ import { useEffect } from 'react';
 const BASE_PATH = '/WAVLIB';
 
 /**
- * Keeps the client-side navigation URL inside the GitHub Pages project path.
- * Never derive the route from window.location.pathname because an earlier
- * navigation can already have landed at the domain root.
+ * Keeps client-side navigation inside the GitHub Pages project path.
+ * The page component owns the rendered view; this only synchronizes the URL.
  */
 export default function PackCardNavigation() {
   useEffect(() => {
+    const sync = (hash: string) => {
+      const nextUrl = `${BASE_PATH}/#${hash}`;
+      const currentUrl = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+      if (currentUrl !== nextUrl) {
+        window.history.pushState(null, '', nextUrl);
+      }
+      window.dispatchEvent(new HashChangeEvent('hashchange'));
+    };
+
     const onClick = (event: MouseEvent) => {
       const target = event.target as HTMLElement | null;
       const navButton = target?.closest<HTMLButtonElement>('.sidebar .nav');
@@ -22,26 +30,15 @@ export default function PackCardNavigation() {
           : label.includes('packs')
             ? 'packs'
             : 'home';
-
         event.preventDefault();
-        const nextUrl = `${BASE_PATH}/#${hash}`;
-        const currentUrl = `${window.location.pathname}${window.location.search}${window.location.hash}`;
-
-        if (currentUrl !== nextUrl) {
-          window.history.pushState(null, '', nextUrl);
-        }
-
-        // The page component owns the rendered view. Dispatch a popstate
-        // event so it can synchronize immediately without a full reload.
-        window.dispatchEvent(new PopStateEvent('popstate'));
+        sync(hash);
         return;
       }
 
       const backButton = target?.closest<HTMLButtonElement>('.crumbs button');
       if (backButton) {
         event.preventDefault();
-        window.history.pushState(null, '', `${BASE_PATH}/#packs`);
-        window.dispatchEvent(new PopStateEvent('popstate'));
+        sync('packs');
       }
     };
 
