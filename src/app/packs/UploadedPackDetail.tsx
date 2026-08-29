@@ -1,12 +1,9 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { ArrowLeft, ChevronDown, Download, Heart, Menu, Package, Play, Search, Share2, X } from 'lucide-react';
+import { ArrowLeft, ChevronDown, Download, Heart, Play, Search, Share2 } from 'lucide-react';
 import { getLivePack, getLivePackSamples, type LivePack, type LiveSample, packCode } from '@/lib/live-pack-data';
 import styles from './[slug]/page.module.css';
-import mobileFixes from './[slug]/mobile-fixes.module.css';
-
-const BASE_PATH = '/WAVLIB';
 
 function formatTime(value: number | null) {
   if (!value || !Number.isFinite(value)) return '--:--';
@@ -75,7 +72,7 @@ export default function UploadedPackDetail({ slug }: { slug: string }) {
     audio.onended = () => setPlaying(null);
   };
 
-  return <main className={`${styles.page} ${mobileFixes.mobilePage}`}>
+  return <main className={styles.page}>
     <div className={styles.crumbs}><button onClick={() => window.history.back()}><ArrowLeft size={15}/> Back to packs</button><span>/</span><span>{pack.name}</span></div>
     <section className={styles.packHeader}>
       <div className={styles.packCover}>
