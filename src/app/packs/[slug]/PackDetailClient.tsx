@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { ArrowLeft, Download, Heart, Home, Menu, Package, Pause, Play, Search, Share2, X } from 'lucide-react';
+import { ArrowLeft, Download, Heart, Home, Menu, Pause, Play, Package, Search, Share2, X } from 'lucide-react';
 import styles from './page.module.css';
 import mobileFixes from './mobile-fixes.module.css';
 import browserFixes from './pack-browser-fixes.module.css';
@@ -106,7 +106,7 @@ export default function PackDetailClient({ slug }: { slug: string }) {
             bpm: r.bpm ?? null,
             key: r.key ?? null,
             duration: r.duration ?? null,
-            waveform: normalizeWaveform(r.waveform),
+            waveform: null,
             storagePath: r.storage_path || r.audio_url,
           })));
         }
