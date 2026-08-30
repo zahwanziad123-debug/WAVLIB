@@ -1,0 +1,53 @@
+/* WAVLIB: clean artwork + responsive layout correction */
+.pack-card .cover span { display: none !important; }
+.pack-card .cover .cover-glow { display: none !important; }
+.pack-card.art-uploaded .cover:before { display: none !important; }
+.pack-card.art-uploaded .cover { background-color: #0b0b0b !important; background-repeat: no-repeat !important; }
+
+/* Never allow decorative/generated card lettering to appear when artwork is absent. */
+.cover span { visibility: hidden !important; }
+
+@media (max-width: 700px) {
+  .view { width: 100%; max-width: 100%; overflow-x: hidden; }
+  .hero {
+    height: auto !important;
+    min-height: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    justify-content: flex-start !important;
+    gap: 24px !important;
+    padding: 28px 24px 26px !important;
+    overflow: hidden !important;
+  }
+  .hero-copy { width: 100%; max-width: 100%; transform: none !important; }
+  .hero h1 {
+    font-size: clamp(36px, 10vw, 46px) !important;
+    line-height: .98 !important;
+    margin: 14px 0 16px !important;
+    max-width: 100%;
+  }
+  .hero p { max-width: 100% !important; line-height: 1.55 !important; }
+  .stat {
+    width: 100%;
+    align-items: flex-start !important;
+    transform: none !important;
+    margin: 0 !important;
+    gap: 3px !important;
+  }
+  .stat strong { font-size: clamp(28px, 8vw, 34px) !important; }
+  .stat span { font-size: 11px; }
+  .pack-grid { width: 100%; min-width: 0; }
+  .pack-card { min-width: 0; max-width: 100%; }
+  .cover { width: 100%; min-width: 0; }
+  .pack-info { min-width: 0; }
+  .pack-info h3 { overflow-wrap: anywhere; }
+}
+
+@media (min-width: 701px) {
+  .pack-card.art-uploaded .cover { aspect-ratio: 1 / 1; }
+}
+
+/* Prevent filter/header controls from creating horizontal overflow. */
+.topbar, .header-search, .filters, .search-panel { min-width: 0; max-width: 100%; }
+.header-search input { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
