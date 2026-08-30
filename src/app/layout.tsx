@@ -10,6 +10,7 @@ import './pack-detail-mobile-fix.css';
 import './final-ui-fix.css';
 import './upload/upload.css';
 import './stability-pass.css';
+import './clean-artwork-layout-fix.css';
 import CopyProtection from './copy-protection';
 import PackCardNavigation from './pack-card-navigation';
 import FilterDropdownFix from './filter-dropdown-fix';
